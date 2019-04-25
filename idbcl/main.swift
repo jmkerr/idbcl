@@ -2,9 +2,6 @@
 //  main.swift
 //  idbcl
 //
-//  Created by Jonathan Kerr on 19.01.19.
-//  Copyright © 2019 Jonathan Kerr. All rights reserved.
-//
 
 import Foundation
 import iTunesLibrary
