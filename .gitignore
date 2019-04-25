@@ -1,0 +1,10 @@
+# Finder data
+.DS_Store
+.Trashes
+
+# User specific XCode data
+*.xcworkspace
+xcuserdata
+
+# Derived data
+DerivedData
