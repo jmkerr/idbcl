@@ -85,11 +85,11 @@ CREATE TABLE IF NOT EXISTS Ratings (
         for (index, item) in untrackedPropertyValues.enumerated() {
             if let item = item as? NSNumber {
                 sqlite3_bind_text(statement, Int32(index + 2), item.stringValue, -1, SQLITE_TRANSIENT)
-                print(persistentID + ": binding to index " + String(index + 2) + " the value " + item.stringValue)
+                //print(persistentID + ": binding to index " + String(index + 2) + " the value " + item.stringValue)
             }
             else if let item = item as? String {
                 sqlite3_bind_text(statement, Int32(index + 2), item, -1, SQLITE_TRANSIENT)
-                print(persistentID + ": binding to index " + String(index + 2) + " the value " + item)
+                //print(persistentID + ": binding to index " + String(index + 2) + " the value " + item)
             }
         }
         

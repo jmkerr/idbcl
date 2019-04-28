@@ -4,7 +4,5 @@
 //
 
 import Foundation
-import iTunesLibrary
-import SQLite3
 
 let lib = MediaLibrary()
