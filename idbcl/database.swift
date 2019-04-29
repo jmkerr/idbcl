@@ -12,7 +12,12 @@ class Database {
     private let sb: StatementBuilder
     
     public init(dbFileName: String) {
-        fileURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false).appendingPathComponent(dbFileName)
+        // TODO: Database as Command Line Argument
+        fileURL = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Dropbox", isDirectory: true)
+            .appendingPathComponent("idbcl", isDirectory: true)
+            .appendingPathComponent("records.sqlite")
+        
 
         if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
             print("Error opening database")
