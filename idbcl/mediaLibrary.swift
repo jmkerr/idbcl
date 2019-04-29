@@ -21,7 +21,7 @@ class MediaLibrary {
             let apiMinorVersion: Int? = lib?.apiMinorVersion
             let musicFolderLocation: URL? = lib?.musicFolderLocation
             
-            print("Writing iTunes Version " + iTunesVersion!)
+            print("iTunes Library Version " + iTunesVersion!)
             print("API Version " + String(apiMajorVersion!) + "." + String(apiMinorVersion!))
             print("In directory " + musicFolderLocation!.absoluteString)
             
