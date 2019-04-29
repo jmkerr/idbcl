@@ -28,6 +28,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8F11078722776CA600957FB6 /* idbcl.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = idbcl.plist; sourceTree = "<group>"; };
 		8F889EE62274446000957FB6 /* mediaLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mediaLibrary.swift; sourceTree = "<group>"; };
 		8F889EE82274ADE500957FB6 /* track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = track.swift; sourceTree = "<group>"; };
 		8FE4479921F34DAF00957FB6 /* idbcl */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = idbcl; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -54,6 +55,7 @@
 		8FE4479021F34DAF00957FB6 = {
 			isa = PBXGroup;
 			children = (
+				8F11078722776CA600957FB6 /* idbcl.plist */,
 				8FE883BD22722A3300957FB6 /* .gitignore */,
 				8FE4479B21F34DAF00957FB6 /* idbcl */,
 				8FE4479A21F34DAF00957FB6 /* Products */,
