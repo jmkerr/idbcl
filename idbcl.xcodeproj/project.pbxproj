@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F301AC62279A1B400957FB6 /* idbcl_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F301AC52279A1B400957FB6 /* idbcl_test.swift */; };
+		8F301ACD2279A3EC00957FB6 /* database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE883BE2272301900957FB6 /* database.swift */; };
+		8F301ACE2279A41900957FB6 /* statementBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFA6EC7227435D500957FB6 /* statementBuilder.swift */; };
 		8F889EE72274446000957FB6 /* mediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F889EE62274446000957FB6 /* mediaLibrary.swift */; };
 		8F889EE92274ADE500957FB6 /* track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F889EE82274ADE500957FB6 /* track.swift */; };
 		8FE4479D21F34DAF00957FB6 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE4479C21F34DAF00957FB6 /* main.swift */; };
@@ -29,6 +32,9 @@
 
 /* Begin PBXFileReference section */
 		8F11078722776CA600957FB6 /* idbcl.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = idbcl.plist; sourceTree = "<group>"; };
+		8F301AC32279A1B400957FB6 /* idbcl-test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "idbcl-test.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F301AC52279A1B400957FB6 /* idbcl_test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = idbcl_test.swift; sourceTree = "<group>"; };
+		8F301AC72279A1B400957FB6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8F889EE62274446000957FB6 /* mediaLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mediaLibrary.swift; sourceTree = "<group>"; };
 		8F889EE82274ADE500957FB6 /* track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = track.swift; sourceTree = "<group>"; };
 		8FE4479921F34DAF00957FB6 /* idbcl */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = idbcl; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -41,6 +47,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		8F301AC02279A1B400957FB6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8FE4479621F34DAF00957FB6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -52,12 +65,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8F301AC42279A1B400957FB6 /* idbcl-test */ = {
+			isa = PBXGroup;
+			children = (
+				8F301AC52279A1B400957FB6 /* idbcl_test.swift */,
+				8F301AC72279A1B400957FB6 /* Info.plist */,
+			);
+			path = "idbcl-test";
+			sourceTree = "<group>";
+		};
 		8FE4479021F34DAF00957FB6 = {
 			isa = PBXGroup;
 			children = (
 				8F11078722776CA600957FB6 /* idbcl.plist */,
 				8FE883BD22722A3300957FB6 /* .gitignore */,
 				8FE4479B21F34DAF00957FB6 /* idbcl */,
+				8F301AC42279A1B400957FB6 /* idbcl-test */,
 				8FE4479A21F34DAF00957FB6 /* Products */,
 				8FE447A321F3525C00957FB6 /* Frameworks */,
 			);
@@ -67,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				8FE4479921F34DAF00957FB6 /* idbcl */,
+				8F301AC32279A1B400957FB6 /* idbcl-test.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,6 +119,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		8F301AC22279A1B400957FB6 /* idbcl-test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8F301ACA2279A1B400957FB6 /* Build configuration list for PBXNativeTarget "idbcl-test" */;
+			buildPhases = (
+				8F301ABF2279A1B400957FB6 /* Sources */,
+				8F301AC02279A1B400957FB6 /* Frameworks */,
+				8F301AC12279A1B400957FB6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "idbcl-test";
+			productName = "idbcl-test";
+			productReference = 8F301AC32279A1B400957FB6 /* idbcl-test.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		8FE4479821F34DAF00957FB6 /* idbcl */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8FE447A021F34DAF00957FB6 /* Build configuration list for PBXNativeTarget "idbcl" */;
@@ -118,10 +159,13 @@
 		8FE4479121F34DAF00957FB6 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1010;
+				LastSwiftUpdateCheck = 1020;
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = default;
 				TargetAttributes = {
+					8F301AC22279A1B400957FB6 = {
+						CreatedOnToolsVersion = 10.2.1;
+					};
 					8FE4479821F34DAF00957FB6 = {
 						CreatedOnToolsVersion = 10.1;
 					};
@@ -140,11 +184,32 @@
 			projectRoot = "";
 			targets = (
 				8FE4479821F34DAF00957FB6 /* idbcl */,
+				8F301AC22279A1B400957FB6 /* idbcl-test */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		8F301AC12279A1B400957FB6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		8F301ABF2279A1B400957FB6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8F301ACD2279A3EC00957FB6 /* database.swift in Sources */,
+				8F301AC62279A1B400957FB6 /* idbcl_test.swift in Sources */,
+				8F301ACE2279A41900957FB6 /* statementBuilder.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8FE4479521F34DAF00957FB6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -160,6 +225,42 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		8F301AC82279A1B400957FB6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = UHJ35SSLRP;
+				INFOPLIST_FILE = "idbcl-test/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.default.idbcl-test";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		8F301AC92279A1B400957FB6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = UHJ35SSLRP;
+				INFOPLIST_FILE = "idbcl-test/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.default.idbcl-test";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		8FE4479E21F34DAF00957FB6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -304,6 +405,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		8F301ACA2279A1B400957FB6 /* Build configuration list for PBXNativeTarget "idbcl-test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F301AC82279A1B400957FB6 /* Debug */,
+				8F301AC92279A1B400957FB6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		8FE4479421F34DAF00957FB6 /* Build configuration list for PBXProject "idbcl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

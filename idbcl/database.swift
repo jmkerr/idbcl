@@ -6,7 +6,7 @@
 import Foundation
 import SQLite3
 
-class Database {
+public class Database {
     private let fileURL: URL
     private var db: OpaquePointer?
     private let sb: StatementBuilder
@@ -16,7 +16,7 @@ class Database {
         fileURL = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Dropbox", isDirectory: true)
             .appendingPathComponent("idbcl", isDirectory: true)
-            .appendingPathComponent("records.sqlite")
+            .appendingPathComponent(dbFileName)
         
 
         if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
