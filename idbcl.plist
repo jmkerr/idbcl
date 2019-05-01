@@ -4,15 +4,17 @@
 <dict>
 	<key>Label</key>
 	<string>idbcl</string>
-	<key>Program</key>
-	<string>./XCode/idbcl/DerivedData/idbcl/Build/Products/Debug/idbcl</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/example/XCode/idbcl/DerivedData/idbcl/Build/Products/Debug/idbcl</string>
+	</array>
 	<key>StandardOutPath</key>
-	<string>./Dropbox/idbcl/stdout</string>
+	<string>/Users/example/Dropbox/idbcl/stdout</string>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>StandardErrorPath</key>
-	<string>./Dropbox/idbcl/stderr</string>
+	<string>/Users/example/Dropbox/idbcl/stderr</string>
 	<key>StartInterval</key>
-	<integer>60</integer>
+	<integer>3456</integer>
 </dict>
 </plist>
