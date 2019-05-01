@@ -6,11 +6,12 @@
 
 import Foundation
 import iTunesLibrary
+import SQLite3
 
 class MediaLibrary {
     let lib: ITLibrary?
-    let media:[ITLibMediaItem]?
-    let db: Database
+    var db: Database
+    let fileURL:URL
     
     init() {
         do {
@@ -24,24 +25,29 @@ class MediaLibrary {
             print("iTunes Library Version " + iTunesVersion!)
             print("API Version " + String(apiMajorVersion!) + "." + String(apiMinorVersion!))
             print("In directory " + musicFolderLocation!.absoluteString)
-            
-            media = lib?.allMediaItems
         } catch {
             print("Error Initializing ITLibrary-Object.")
             exit(-5)
-        }
+        }        
         
-        db = Database(dbFileName: "records.sqlite3")
+        fileURL = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Dropbox", isDirectory: true)
+            .appendingPathComponent("idbcl", isDirectory: true)
+            .appendingPathComponent("records-test.sqlite3")
+        
+        db = Database(dbFileURL: fileURL)
         db.createTables()
         
         scan()
     }
     
     private func scan() {
+        let media = lib?.allMediaItems
         for item in media! {
             if item.mediaKind == ITLibMediaItemMediaKind.kindSong {
                 let tr = Track(fromItem: item)
-                tr.updateTables(updateDB: db)
+                db.UpdateMeta(updateTrack: tr)
+                db.UpdatePlayCounts(updateTrack: tr)
             }
         }
     }
