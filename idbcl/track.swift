@@ -37,6 +37,5 @@ class Track {
     public func updateTables(updateDB: Database) {
         updateDB.updateMeta(persistentID: persistentID, untrackedPropertyValues: untrackedPropertyValues)
         updateDB.updateTable(tableName: "PlayCounts", persistentID: persistentID, trackedPropertyValue: playCount)
-        updateDB.updateTable(tableName: "Ratings", persistentID: persistentID, trackedPropertyValue: rating)
     }
 }
