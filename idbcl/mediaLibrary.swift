@@ -11,7 +11,6 @@ import SQLite3
 class MediaLibrary {
     let lib: ITLibrary?
     var db: Database
-    let fileURL:URL
     
     init() {
         do {
@@ -30,7 +29,7 @@ class MediaLibrary {
             exit(-5)
         }        
         
-        fileURL = FileManager.default.homeDirectoryForCurrentUser
+        let fileURL: URL = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Dropbox", isDirectory: true)
             .appendingPathComponent("idbcl", isDirectory: true)
             .appendingPathComponent("records-test.sqlite3")

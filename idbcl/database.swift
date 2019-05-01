@@ -51,7 +51,7 @@ class Database {
         
         var bindPosition: Int32 = 2
         for item in updateTrack.GetUntrackedPropertyValuesAsStrings() {
-            sqlite3_bind_text(statement, bindPosition, item.value, -1, SQLITE_TRANSIENT)
+            sqlite3_bind_text(statement, bindPosition, item, -1, SQLITE_TRANSIENT)
             bindPosition += 1
         }
         

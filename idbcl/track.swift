@@ -21,17 +21,17 @@ let untrackedProperties = [
 
 class Track {
     private let persistentID: String
-    private let untrackedPropertyValues: [String: Any]
+    private let untrackedPropertyValues: [Any]
     private let rating: Any
     private let playCount: Any
     
     public init(fromItem: ITLibMediaItem) {
         persistentID = String(format: "%llX", fromItem.persistentID.uint64Value)
         
-        untrackedPropertyValues = Dictionary(uniqueKeysWithValues:
+        untrackedPropertyValues =
         untrackedProperties.map {
-            ($0 as String, fromItem.value(forProperty: $0)!)
-        })
+            fromItem.value(forProperty: $0)!
+        }
         
         rating = fromItem.value(forProperty: ITLibMediaItemPropertyRating) ?? 50
         playCount = fromItem.value(forProperty: ITLibMediaItemPropertyPlayCount) ?? 0
@@ -57,15 +57,15 @@ class Track {
         }
     }
     
-    public func GetUntrackedPropertyValuesAsStrings() -> [String: String] {
-        var result: [String: String] = [String: String]()
+    public func GetUntrackedPropertyValuesAsStrings() -> [String] {
+        var result: [String] = [String]()
         
-        for (key, val) in untrackedPropertyValues {
-            if let val = val as? NSNumber {
-                result.updateValue(val.stringValue, forKey: key)
+        for element in untrackedPropertyValues {
+            if let val = element as? NSNumber {
+                result.append(val.stringValue)
             }
-            else if let val = val as? String {
-                result.updateValue(val, forKey: key)
+            else if let val = element as? String {
+                result.append(val)
             }
         }
         return result
