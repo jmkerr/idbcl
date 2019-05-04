@@ -18,7 +18,6 @@ class idbcl_test: XCTestCase {
     func testExample() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
-        var db = Database(dbFileName: "records-test.sqlite3")
     }
 
     func testPerformanceExample() {
