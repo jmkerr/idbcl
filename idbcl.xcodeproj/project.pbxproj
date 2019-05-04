@@ -168,6 +168,7 @@
 					};
 					8FE4479821F34DAF00957FB6 = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1020;
 					};
 				};
 			};
@@ -385,7 +386,7 @@
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/iTunesLibrary.framework;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -398,7 +399,7 @@
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/iTunesLibrary.framework;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
