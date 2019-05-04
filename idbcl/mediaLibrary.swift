@@ -35,18 +35,19 @@ class MediaLibrary {
             .appendingPathComponent("records-test.sqlite3")
         
         db = Database(dbFileURL: fileURL)
-        db.createTables()
+        db.CreateTables()
         
-        scan()
+        UpdateDB()
     }
     
-    private func scan() {
+    private func UpdateDB() {
         let media = lib?.allMediaItems
         for item in media! {
             if item.mediaKind == ITLibMediaItemMediaKind.kindSong {
                 let tr = Track(fromItem: item)
-                db.UpdateMeta(updateTrack: tr)
-                db.UpdatePlayCounts(updateTrack: tr)
+                db.UpdateMeta(forTrack: tr)
+                db.UpdatePlayCounts(forTrack: tr)
+                db.UpdateRatings(forTrack: tr)
             }
         }
     }
