@@ -79,6 +79,17 @@ class Database {
         } else { return nil }
     }
     
+    public func GetLastPlayCount(forTrack: Track) -> Int? {
+        var statement: OpaquePointer?
+        sqlite3_prepare_v2(db, "SELECT PlayCount FROM PlayCounts WHERE PersistentID = ? ORDER BY Date DESC LIMIT 1", -1, &statement, nil)
+        sqlite3_bind_text(statement, 1, forTrack.GetPersistentID(), -1, SQLITE_TRANSIENT)
+        let queryResult = ExecuteScalarQuery(statement: statement)
+        
+        if let result = queryResult as? NSNumber {
+            return result.intValue
+        } else { return nil }
+    }
+    
     public func UpdateMeta(forTrack: Track) {
         var statement: OpaquePointer?
         sqlite3_prepare_v2(db, "INSERT OR REPLACE INTO Meta VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", -1, &statement, nil)
@@ -93,7 +104,7 @@ class Database {
         ExecuteNonQuery(statement: statement)
     }
     
-    public func UpdatePlayCounts(forTrack: Track) {
+    public func WritePlayCount(forTrack: Track) {
         var statement: OpaquePointer?
         sqlite3_prepare_v2(db
             , "INSERT OR REPLACE INTO PlayCounts VALUES (?, STRFTIME('%s', 'now'), ?)"
@@ -105,6 +116,20 @@ class Database {
         sqlite3_bind_text(statement, 2, forTrack.GetPlayCount(), -1, SQLITE_TRANSIENT)
         
         ExecuteNonQuery(statement: statement)
+    }
+    
+    public func UpdatePlayCounts(forTrack: Track) {
+        if GetLastPlayCount(forTrack: forTrack) == nil {
+            print("Title: \(forTrack.GetUntrackedPropertyValuesAsStrings()[7]) - First PlayCount: \(forTrack.GetPlayCount())")
+            WritePlayCount(forTrack: forTrack)
+            return
+        }
+        
+        if String(GetLastPlayCount(forTrack: forTrack)!) != forTrack.GetPlayCount() {
+            print("Title: \(forTrack.GetUntrackedPropertyValuesAsStrings()[7]) - Updated PlayCount: \(GetLastPlayCount(forTrack: forTrack)!) -> \(forTrack.GetPlayCount())")
+            WritePlayCount(forTrack: forTrack)
+            return
+        }
     }
     
     private func WriteRating(forTrack: Track) {
@@ -129,7 +154,7 @@ class Database {
         }
         
         if String(GetLastRating(forTrack: forTrack)!) != forTrack.GetRating() {
-            print("Title: \(forTrack.GetUntrackedPropertyValuesAsStrings()[7]) - Updated Rating: \(forTrack.GetRating())")
+            print("Title: \(forTrack.GetUntrackedPropertyValuesAsStrings()[7]) - Updated Rating: \(GetLastRating(forTrack: forTrack)!) -> \(forTrack.GetRating())")
             WriteRating(forTrack: forTrack)
             return
         }
