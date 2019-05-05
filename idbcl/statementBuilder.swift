@@ -63,8 +63,7 @@ CREATE TABLE IF NOT EXISTS PlayCounts (
 CREATE TABLE IF NOT EXISTS Ratings (
     PersistentID TEXT,
     Date INTEGER,
-    Rating INTEGER,
-    PRIMARY KEY(PersistentID, Rating))
+    Rating INTEGER)
 """
             , -1
             , &statement
