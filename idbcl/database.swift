@@ -123,11 +123,13 @@ class Database {
     
     public func UpdateRatings(forTrack: Track) {
         if GetLastRating(forTrack: forTrack) == nil {
+            print("Title: \(forTrack.GetUntrackedPropertyValuesAsStrings()[7]) - First Rating: \(forTrack.GetRating())")
             WriteRating(forTrack: forTrack)
             return
         }
         
         if String(GetLastRating(forTrack: forTrack)!) != forTrack.GetRating() {
+            print("Title: \(forTrack.GetUntrackedPropertyValuesAsStrings()[7]) - Updated Rating: \(forTrack.GetRating())")
             WriteRating(forTrack: forTrack)
             return
         }
