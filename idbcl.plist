@@ -7,6 +7,7 @@
 	<key>ProgramArguments</key>
 	<array>
 		<string>/Users/example/XCode/idbcl/DerivedData/idbcl/Build/Products/Debug/idbcl</string>
+		<string>/Users/example/Dropbox/idbcl/records.sqlite3</string>
 	</array>
 	<key>StandardOutPath</key>
 	<string>/Users/example/Dropbox/idbcl/stdout</string>

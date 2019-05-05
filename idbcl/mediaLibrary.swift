@@ -10,7 +10,7 @@ import SQLite3
 
 class MediaLibrary {
     let lib: ITLibrary?
-    var db: Database
+    var db: Database?
     
     init() {
         do {
@@ -27,17 +27,18 @@ class MediaLibrary {
         } catch {
             print("Error Initializing ITLibrary-Object.")
             exit(-5)
-        }        
+        }
         
-        let fileURL: URL = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Dropbox", isDirectory: true)
-            .appendingPathComponent("idbcl", isDirectory: true)
-            .appendingPathComponent("records-test.sqlite3")
-        
-        db = Database(dbFileURL: fileURL)
-        db.CreateTables()
-        
-        UpdateDB()
+        if Configuration.dbFileURL != nil {
+            db = Database(dbFileURL: Configuration.dbFileURL!)
+            db!.CreateTables()
+            UpdateDB()
+        } else {
+            print("""
+Usage:
+    idbcl <database>
+""")
+        }
     }
     
     private func UpdateDB() {
@@ -45,9 +46,9 @@ class MediaLibrary {
         for item in media! {
             if item.mediaKind == ITLibMediaItemMediaKind.kindSong {
                 let tr = Track(fromItem: item)
-                db.UpdateMeta(forTrack: tr)
-                db.UpdatePlayCounts(forTrack: tr)
-                db.UpdateRatings(forTrack: tr)
+                db!.UpdateMeta(forTrack: tr)
+                db!.UpdatePlayCounts(forTrack: tr)
+                db!.UpdateRatings(forTrack: tr)
             }
         }
     }
