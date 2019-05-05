@@ -70,6 +70,4 @@ class Track {
         }
         return result
     }
-    
-    
 }
