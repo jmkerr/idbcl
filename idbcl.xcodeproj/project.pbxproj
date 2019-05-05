@@ -9,13 +9,13 @@
 /* Begin PBXBuildFile section */
 		8F301AC62279A1B400957FB6 /* idbcl_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F301AC52279A1B400957FB6 /* idbcl_test.swift */; };
 		8F301ACD2279A3EC00957FB6 /* database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE883BE2272301900957FB6 /* database.swift */; };
-		8F301ACE2279A41900957FB6 /* statementBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFA6EC7227435D500957FB6 /* statementBuilder.swift */; };
+		8F301ACE2279A41900957FB6 /* statements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFA6EC7227435D500957FB6 /* statements.swift */; };
 		8F889EE72274446000957FB6 /* mediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F889EE62274446000957FB6 /* mediaLibrary.swift */; };
 		8F889EE92274ADE500957FB6 /* track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F889EE82274ADE500957FB6 /* track.swift */; };
 		8FE4479D21F34DAF00957FB6 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE4479C21F34DAF00957FB6 /* main.swift */; };
 		8FE447A521F3525C00957FB6 /* iTunesLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FE447A421F3525C00957FB6 /* iTunesLibrary.framework */; };
 		8FE883BF2272301900957FB6 /* database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE883BE2272301900957FB6 /* database.swift */; };
-		8FFA6EC8227435D500957FB6 /* statementBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFA6EC7227435D500957FB6 /* statementBuilder.swift */; };
+		8FFA6EC8227435D500957FB6 /* statements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFA6EC7227435D500957FB6 /* statements.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,7 +43,7 @@
 		8FE447A621F352F900957FB6 /* iTunesLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iTunesLibrary.framework; path = ../../../../System/Library/Frameworks/iTunesLibrary.framework; sourceTree = "<group>"; };
 		8FE883BD22722A3300957FB6 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		8FE883BE2272301900957FB6 /* database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = database.swift; sourceTree = "<group>"; };
-		8FFA6EC7227435D500957FB6 /* statementBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = statementBuilder.swift; sourceTree = "<group>"; };
+		8FFA6EC7227435D500957FB6 /* statements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = statements.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,7 +100,7 @@
 			children = (
 				8FE4479C21F34DAF00957FB6 /* main.swift */,
 				8FE883BE2272301900957FB6 /* database.swift */,
-				8FFA6EC7227435D500957FB6 /* statementBuilder.swift */,
+				8FFA6EC7227435D500957FB6 /* statements.swift */,
 				8F889EE62274446000957FB6 /* mediaLibrary.swift */,
 				8F889EE82274ADE500957FB6 /* track.swift */,
 			);
@@ -207,7 +207,7 @@
 			files = (
 				8F301ACD2279A3EC00957FB6 /* database.swift in Sources */,
 				8F301AC62279A1B400957FB6 /* idbcl_test.swift in Sources */,
-				8F301ACE2279A41900957FB6 /* statementBuilder.swift in Sources */,
+				8F301ACE2279A41900957FB6 /* statements.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -219,7 +219,7 @@
 				8FE883BF2272301900957FB6 /* database.swift in Sources */,
 				8F889EE72274446000957FB6 /* mediaLibrary.swift in Sources */,
 				8FE4479D21F34DAF00957FB6 /* main.swift in Sources */,
-				8FFA6EC8227435D500957FB6 /* statementBuilder.swift in Sources */,
+				8FFA6EC8227435D500957FB6 /* statements.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

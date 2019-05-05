@@ -10,7 +10,7 @@ let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
 class Database {
     private var db: OpaquePointer?
-    private let sb: StatementBuilder
+    private let sb: Statements
     
     public init(dbFileURL: URL) {
 
@@ -21,7 +21,7 @@ class Database {
             print("Opened Database " + dbFileURL.absoluteString)
         }
         
-        sb = StatementBuilder(targetDb: db)
+        sb = Statements(targetDb: db)
     }
     
     deinit {
