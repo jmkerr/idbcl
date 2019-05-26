@@ -26,7 +26,12 @@ class Track {
     private let playCount: Any
     
     public init(fromItem: ITLibMediaItem) {
-        persistentID = String(format: "%llX", fromItem.persistentID.uint64Value)
+        var tmpPersistentID = String(format: "%llX", fromItem.persistentID.uint64Value)
+        
+        while tmpPersistentID.count != 16 {
+            tmpPersistentID = "0" + tmpPersistentID
+        }
+        persistentID = tmpPersistentID
         
         untrackedPropertyValues =
         untrackedProperties.map {
