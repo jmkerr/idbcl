@@ -5,6 +5,8 @@
 
 import Foundation
 
-print("\n" + String(describing: Date()))
+let dateFormatter = DateFormatter()
+dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+print(dateFormatter.string(from: Date()))
 
 let lib = MediaLibrary()
