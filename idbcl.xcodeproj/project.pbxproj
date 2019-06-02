@@ -81,7 +81,7 @@
 			children = (
 				8F11078722776CA600957FB6 /* idbcl.plist */,
 				8FE883BD22722A3300957FB6 /* .gitignore */,
-				8FE4479B21F34DAF00957FB6 /* idbcl */,
+				8FE4479B21F34DAF00957FB6 /* src */,
 				8F301AC42279A1B400957FB6 /* idbcl-test */,
 				8FE4479A21F34DAF00957FB6 /* Products */,
 				8FE447A321F3525C00957FB6 /* Frameworks */,
@@ -97,7 +97,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8FE4479B21F34DAF00957FB6 /* idbcl */ = {
+		8FE4479B21F34DAF00957FB6 /* src */ = {
 			isa = PBXGroup;
 			children = (
 				8FE4479C21F34DAF00957FB6 /* main.swift */,
@@ -107,7 +107,7 @@
 				8F889EE82274ADE500957FB6 /* track.swift */,
 				8F442F99227F14B500957FB6 /* configuration.swift */,
 			);
-			path = idbcl;
+			path = src;
 			sourceTree = "<group>";
 		};
 		8FE447A321F3525C00957FB6 /* Frameworks */ = {
