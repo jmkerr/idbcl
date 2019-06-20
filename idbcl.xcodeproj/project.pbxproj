@@ -11,6 +11,7 @@
 		8F301ACD2279A3EC00957FB6 /* database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE883BE2272301900957FB6 /* database.swift */; };
 		8F301ACE2279A41900957FB6 /* statements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFA6EC7227435D500957FB6 /* statements.swift */; };
 		8F442F9A227F14B500957FB6 /* configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F442F99227F14B500957FB6 /* configuration.swift */; };
+		8F6ECBF922BB91E600957FB6 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 8F6ECBF822BB91E600957FB6 /* Makefile */; };
 		8F889EE72274446000957FB6 /* mediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F889EE62274446000957FB6 /* mediaLibrary.swift */; };
 		8F889EE92274ADE500957FB6 /* track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F889EE82274ADE500957FB6 /* track.swift */; };
 		8FE4479D21F34DAF00957FB6 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE4479C21F34DAF00957FB6 /* main.swift */; };
@@ -37,6 +38,7 @@
 		8F301AC52279A1B400957FB6 /* idbcl_test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = idbcl_test.swift; sourceTree = "<group>"; };
 		8F301AC72279A1B400957FB6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8F442F99227F14B500957FB6 /* configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configuration.swift; sourceTree = "<group>"; };
+		8F6ECBF822BB91E600957FB6 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		8F889EE62274446000957FB6 /* mediaLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mediaLibrary.swift; sourceTree = "<group>"; };
 		8F889EE82274ADE500957FB6 /* track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = track.swift; sourceTree = "<group>"; };
 		8FE4479921F34DAF00957FB6 /* idbcl */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = idbcl; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -79,6 +81,7 @@
 		8FE4479021F34DAF00957FB6 = {
 			isa = PBXGroup;
 			children = (
+				8F6ECBF822BB91E600957FB6 /* Makefile */,
 				8F11078722776CA600957FB6 /* idbcl.plist */,
 				8FE883BD22722A3300957FB6 /* .gitignore */,
 				8FE4479B21F34DAF00957FB6 /* src */,
@@ -223,6 +226,7 @@
 				8F889EE72274446000957FB6 /* mediaLibrary.swift in Sources */,
 				8FE4479D21F34DAF00957FB6 /* main.swift in Sources */,
 				8F442F9A227F14B500957FB6 /* configuration.swift in Sources */,
+				8F6ECBF922BB91E600957FB6 /* Makefile in Sources */,
 				8FFA6EC8227435D500957FB6 /* statements.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
