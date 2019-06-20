@@ -39,6 +39,7 @@
 		8F301AC72279A1B400957FB6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8F442F99227F14B500957FB6 /* configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configuration.swift; sourceTree = "<group>"; };
 		8F6ECBF822BB91E600957FB6 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; usesTabs = 1; };
+		8F6ECBFA22BB9D9A00957FB6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8F889EE62274446000957FB6 /* mediaLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mediaLibrary.swift; sourceTree = "<group>"; };
 		8F889EE82274ADE500957FB6 /* track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = track.swift; sourceTree = "<group>"; };
 		8FE4479921F34DAF00957FB6 /* idbcl */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = idbcl; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,6 +82,7 @@
 		8FE4479021F34DAF00957FB6 = {
 			isa = PBXGroup;
 			children = (
+				8F6ECBFA22BB9D9A00957FB6 /* README.md */,
 				8F6ECBF822BB91E600957FB6 /* Makefile */,
 				8F11078722776CA600957FB6 /* idbcl.plist */,
 				8FE883BD22722A3300957FB6 /* .gitignore */,

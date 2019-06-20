@@ -10,9 +10,11 @@ all:
 		$(SCFLAGS) \
 		$(SRC) \
 		-o $(BIN)/$(NAME) \
-		-framework iTunesLibrary \
-		-framework Foundation
+		-framework iTunesLibrary,Foundation
 	codesign \
 		-s "-" \
 		-v \
 		$(BIN)/$(NAME)
+
+clean:
+	rm -r $(BIN)
