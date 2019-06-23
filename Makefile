@@ -3,9 +3,10 @@ BIN = ./bin
 NAME = idbcl
 SRC = $(wildcard ./src/*.swift)
 
-$(shell mkdir $(BIN))
+
 
 all:
+	$(shell mkdir -p $(BIN))
 	swiftc \
 		$(SCFLAGS) \
 		$(SRC) \
