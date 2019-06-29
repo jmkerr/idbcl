@@ -6,15 +6,15 @@
 	<string>idbcl</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/example/XCode/idbcl/DerivedData/idbcl/Build/Products/Debug/idbcl</string>
-		<string>/Users/example/Dropbox/idbcl/records.sqlite3</string>
+		<string>/path/of/bin</string>
+		<string>/path/of/database</string>
 	</array>
 	<key>StandardOutPath</key>
-	<string>/Users/example/Dropbox/idbcl/stdout</string>
+	<string>/path/of/stdout-file</string>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>StandardErrorPath</key>
-	<string>/Users/example/Dropbox/idbcl/stderr</string>
+	<string>/path/of/stderr-file</string>
 	<key>StartInterval</key>
 	<integer>3456</integer>
 </dict>
