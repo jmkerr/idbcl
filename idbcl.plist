@@ -7,7 +7,6 @@
 	<key>ProgramArguments</key>
 	<array>
 		<string>/path/of/bin</string>
-		<string>/path/of/database</string>
 	</array>
 	<key>StandardOutPath</key>
 	<string>/path/of/stdout-file</string>

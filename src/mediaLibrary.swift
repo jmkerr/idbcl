@@ -29,6 +29,15 @@ class MediaLibrary {
         }
         
         if Configuration.dbFileURL != nil {
+            let dbDirectory: URL = Configuration.dbFileURL!.deletingLastPathComponent()
+            do {
+                try FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: false, attributes: nil)
+            } catch CocoaError.fileWriteFileExists {
+                // Not an error
+            } catch {
+                print("\(error)")
+            }
+                
             db = Database(dbFileURL: Configuration.dbFileURL!)
             db!.CreateTables()
             UpdateDB()
