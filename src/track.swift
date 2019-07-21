@@ -6,6 +6,9 @@
 import Foundation
 import iTunesLibrary
 
+let DEFAULT_RATING = 50
+let DEFAULT_PLAY_COUNT = 0
+
 let untrackedProperties = [
     ITLibMediaItemPropertyAlbumTitle
     , ITLibMediaItemPropertyArtistName
@@ -38,8 +41,8 @@ class Track {
             fromItem.value(forProperty: $0)!
         }
         
-        rating = fromItem.value(forProperty: ITLibMediaItemPropertyRating) ?? 50
-        playCount = fromItem.value(forProperty: ITLibMediaItemPropertyPlayCount) ?? 0
+        rating = fromItem.value(forProperty: ITLibMediaItemPropertyRating) ?? DEFAULT_RATING
+        playCount = fromItem.value(forProperty: ITLibMediaItemPropertyPlayCount) ?? DEFAULT_PLAY_COUNT
     }
     
     public func GetPersistentID() -> String {
