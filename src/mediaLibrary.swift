@@ -5,7 +5,6 @@
 
 import Foundation
 import iTunesLibrary
-import SQLite3
 
 class MediaLibrary {
     let lib: ITLibrary?
