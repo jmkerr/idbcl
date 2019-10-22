@@ -1,0 +1,6 @@
+os: osx
+osx_image:
+  - xcode11.1
+  - xcode10.3
+language: swift
+script: make
