@@ -1,62 +1,62 @@
-//
-//  mediaLibrary.swift
-//  idbcl
-//
-
-import Foundation
 import iTunesLibrary
 
 class MediaLibrary {
-    let lib: ITLibrary?
-    var db: Database?
+    private let lib: ITLibrary?
+    private let db: Database?
     
-    init() {
+    init?() {
         do {
             lib = try ITLibrary(apiVersion: "1.1")
-            
-            let iTunesVersion: String? = lib?.applicationVersion
-            let apiMajorVersion: Int? = lib?.apiMajorVersion
-            let apiMinorVersion: Int? = lib?.apiMinorVersion
-            let musicFolderLocation: URL? = lib?.musicFolderLocation
-            
-            print("iTunes Library Version " + iTunesVersion!)
-            print("API Version " + String(apiMajorVersion!) + "." + String(apiMinorVersion!))
-            print("In directory " + musicFolderLocation!.absoluteString)
         } catch {
-            print("Error Initializing ITLibrary-Object.")
-            exit(-5)
+            print("Error initializing ITLibrary: \(error)")
+            return nil
         }
         
-        if Configuration.dbFileURL != nil {
-            let dbDirectory: URL = Configuration.dbFileURL!.deletingLastPathComponent()
-            do {
-                try FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: false, attributes: nil)
-            } catch CocoaError.fileWriteFileExists {
-                // Not an error
-            } catch {
-                print("\(error)")
-            }
-                
-            db = Database(dbFileURL: Configuration.dbFileURL!)
-            db!.CreateTables()
-            UpdateDB()
-        } else {
-            print("""
-Usage:
-    idbcl <database>
-""")
+        if let applicationVersion: String = lib?.applicationVersion,
+            let apiMajorVersion: Int = lib?.apiMajorVersion,
+            let apiMinorVersion: Int = lib?.apiMinorVersion,
+            let musicFolderLocation: URL = lib?.musicFolderLocation {
+                print("iTunes Library Version " + applicationVersion
+                    + ", API Version " + String(apiMajorVersion) + "." + String(apiMinorVersion))
+                print("In directory " + musicFolderLocation.absoluteString)
         }
+        
+        guard let dbPath = Configuration.dbFileURL else {
+            print("Configuration error.")
+            return nil
+        }
+        
+        do {
+            let dbDirectory: URL = dbPath.deletingLastPathComponent()
+            try FileManager.default.createDirectory(at: dbDirectory,
+                                                        withIntermediateDirectories: false,
+                                                        attributes: nil)
+        } catch CocoaError.fileWriteFileExists {
+            // Ignore error
+        } catch {
+            print("Error creating directory: \(error)")
+            return nil
+        }
+            
+        db = Database(dbFileURL: dbPath)
     }
-    
-    private func UpdateDB() {
-        let media = lib?.allMediaItems
-        for item in media! {
-            if item.mediaKind == ITLibMediaItemMediaKind.kindSong {
-                let tr = Track(fromItem: item)
-                db!.UpdateMeta(forTrack: tr)
-                db!.UpdatePlayCounts(forTrack: tr)
-                db!.UpdateRatings(forTrack: tr)
+
+    public func UpdateDB() {
+        if let mediaItems = lib?.allMediaItems,
+            let db = db {
+            let songItems = mediaItems.filter { $0.mediaKind == ITLibMediaItemMediaKind.kindSong }
+            if songItems.count > 0 {
+                for item in songItems {
+                    let tr = Track(fromItem: item)
+                    db.UpdateMeta(forTrack: tr)
+                    db.UpdatePlayCounts(forTrack: tr)
+                    db.UpdateRatings(forTrack: tr)
+                }
+            } else {
+                print("The iTunes-Library appears to be empty.")
             }
+        } else {
+            print("Invalid operation")
         }
     }
 }

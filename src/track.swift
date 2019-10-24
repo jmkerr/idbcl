@@ -1,15 +1,9 @@
-//
-//  track.swift
-//  idbcl
-//
-
-import Foundation
 import iTunesLibrary
 
-let DEFAULT_RATING = 50
-let DEFAULT_PLAY_COUNT = 0
+let DEFAULT_RATING: Int = 50
+let DEFAULT_PLAY_COUNT: Int = 0
 
-let untrackedProperties = [
+let UNTRACKED_PROPERTIES = [
     ITLibMediaItemPropertyAlbumTitle
     , ITLibMediaItemPropertyArtistName
     , ITLibMediaItemPropertyBitRate
@@ -23,59 +17,19 @@ let untrackedProperties = [
 ] 
 
 class Track {
-    private let persistentID: String
-    private let untrackedPropertyValues: [Any]
-    private let rating: Any
-    private let playCount: Any
+    public let persistentID: String
+    public let untrackedProperties: [String]
+    public let rating: Int
+    public let playCount: Int
     
     public init(fromItem: ITLibMediaItem) {
-        var tmpPersistentID = String(format: "%llX", fromItem.persistentID.uint64Value)
+        persistentID = String(format: "%016llX", fromItem.persistentID.uint64Value)
         
-        while tmpPersistentID.count != 16 {
-            tmpPersistentID = "0" + tmpPersistentID
-        }
-        persistentID = tmpPersistentID
-        
-        untrackedPropertyValues =
-        untrackedProperties.map {
-            fromItem.value(forProperty: $0)!
+        untrackedProperties = UNTRACKED_PROPERTIES.map {
+            String(describing: fromItem.value(forProperty: $0)!)
         }
         
-        rating = fromItem.value(forProperty: ITLibMediaItemPropertyRating) ?? DEFAULT_RATING
-        playCount = fromItem.value(forProperty: ITLibMediaItemPropertyPlayCount) ?? DEFAULT_PLAY_COUNT
-    }
-    
-    public func GetPersistentID() -> String {
-        return persistentID
-    }
-    
-    public func GetRating() -> String {
-        if let result = rating as? NSNumber {
-            return result.stringValue
-        } else {
-            return "NULL"
-        }
-    }
-    
-    public func GetPlayCount() -> String {
-        if let result = playCount as? NSNumber {
-            return result.stringValue
-        } else {
-            return "NULL"
-        }
-    }
-    
-    public func GetUntrackedPropertyValuesAsStrings() -> [String] {
-        var result: [String] = [String]()
-        
-        for element in untrackedPropertyValues {
-            if let val = element as? NSNumber {
-                result.append(val.stringValue)
-            }
-            else if let val = element as? String {
-                result.append(val)
-            }
-        }
-        return result
+        rating = fromItem.value(forProperty: ITLibMediaItemPropertyRating) as? Int ?? DEFAULT_RATING
+        playCount = fromItem.value(forProperty: ITLibMediaItemPropertyPlayCount) as? Int ?? DEFAULT_PLAY_COUNT
     }
 }
