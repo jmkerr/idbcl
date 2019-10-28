@@ -10,3 +10,8 @@ xcuserdata
 DerivedData
 idbcl.xcodeproj/xcshareddata
 bin
+
+# generatedd data
+stdout
+stderr
+idbcl.plist

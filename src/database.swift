@@ -13,7 +13,7 @@ class Database {
             return nil
         }
         else {
-            print("Opened Database " + dbFileURL.absoluteString)
+            print("Opened Database " + dbFileURL.path)
         }
         
         CreateTables()

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F018216236707B20013A0BF /* utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F018215236707B20013A0BF /* utilities.swift */; };
 		8F301AC62279A1B400957FB6 /* idbcl_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F301AC52279A1B400957FB6 /* idbcl_test.swift */; };
 		8F301ACD2279A3EC00957FB6 /* database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE883BE2272301900957FB6 /* database.swift */; };
 		8F442F9A227F14B500957FB6 /* configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F442F99227F14B500957FB6 /* configuration.swift */; };
@@ -30,7 +31,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		8F11078722776CA600957FB6 /* idbcl.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = idbcl.plist; sourceTree = "<group>"; };
+		8F018215236707B20013A0BF /* utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = utilities.swift; sourceTree = "<group>"; };
 		8F301AC32279A1B400957FB6 /* idbcl-test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "idbcl-test.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F301AC52279A1B400957FB6 /* idbcl_test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = idbcl_test.swift; sourceTree = "<group>"; };
 		8F301AC72279A1B400957FB6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -81,7 +82,6 @@
 				8F73F107235E3E69007A1033 /* .travis.yml */,
 				8F6ECBFA22BB9D9A00957FB6 /* README.md */,
 				8F6ECBF822BB91E600957FB6 /* Makefile */,
-				8F11078722776CA600957FB6 /* idbcl.plist */,
 				8FE883BD22722A3300957FB6 /* .gitignore */,
 				8FE4479B21F34DAF00957FB6 /* src */,
 				8F301AC42279A1B400957FB6 /* idbcl-test */,
@@ -107,6 +107,7 @@
 				8F889EE62274446000957FB6 /* mediaLibrary.swift */,
 				8F889EE82274ADE500957FB6 /* track.swift */,
 				8F442F99227F14B500957FB6 /* configuration.swift */,
+				8F018215236707B20013A0BF /* utilities.swift */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -217,6 +218,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8F018216236707B20013A0BF /* utilities.swift in Sources */,
 				8F889EE92274ADE500957FB6 /* track.swift in Sources */,
 				8FE883BF2272301900957FB6 /* database.swift in Sources */,
 				8F889EE72274446000957FB6 /* mediaLibrary.swift in Sources */,

@@ -26,7 +26,7 @@ class Track {
         persistentID = String(format: "%016llX", fromItem.persistentID.uint64Value)
         
         untrackedProperties = UNTRACKED_PROPERTIES.map {
-            String(describing: fromItem.value(forProperty: $0)!)
+            String(describing: fromItem.value(forProperty: $0) ?? "")
         }
         
         rating = fromItem.value(forProperty: ITLibMediaItemPropertyRating) as? Int ?? DEFAULT_RATING

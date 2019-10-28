@@ -18,7 +18,7 @@ class MediaLibrary {
             let musicFolderLocation: URL = lib?.musicFolderLocation {
                 print("iTunes Library Version " + applicationVersion
                     + ", API Version " + String(apiMajorVersion) + "." + String(apiMinorVersion))
-                print("In directory " + musicFolderLocation.absoluteString)
+                print("In directory " + musicFolderLocation.path)
         }
         
         guard let dbPath = Configuration.dbFileURL else {
@@ -31,6 +31,7 @@ class MediaLibrary {
             try FileManager.default.createDirectory(at: dbDirectory,
                                                         withIntermediateDirectories: false,
                                                         attributes: nil)
+            print("Creating " + dbDirectory.path)
         } catch CocoaError.fileWriteFileExists {
             // Ignore error
         } catch {
