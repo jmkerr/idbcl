@@ -139,7 +139,7 @@ class Database {
     
     public func UpdateMeta(forTrack: Track) {
         ExecuteNonQuery(sql: "INSERT OR REPLACE INTO Meta VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        params: [forTrack.persistentID] + forTrack.untrackedProperties)
+                        params: [forTrack.persistentID] + forTrack.staticProperties)
     }
     
     private func WritePlayCount(forTrack: Track) {
@@ -151,13 +151,13 @@ class Database {
     
     public func UpdatePlayCounts(forTrack: Track) {
         if GetLastPlayCount(forTrack: forTrack) == nil {
-            print("Title: \(forTrack.untrackedProperties[7]) - First PlayCount: \(forTrack.playCount)")
+            print("Title: \(forTrack.staticProperties[7]) - First PlayCount: \(forTrack.playCount)")
             WritePlayCount(forTrack: forTrack)
             return
         }
         
         if GetLastPlayCount(forTrack: forTrack) != forTrack.playCount {
-            print("Title: \(forTrack.untrackedProperties[7]) - Updated PlayCount: \(GetLastPlayCount(forTrack: forTrack)!) -> \(forTrack.playCount)")
+            print("Title: \(forTrack.staticProperties[7]) - Updated PlayCount: \(GetLastPlayCount(forTrack: forTrack)!) -> \(forTrack.playCount)")
             WritePlayCount(forTrack: forTrack)
             return
         }
@@ -173,13 +173,13 @@ class Database {
     
     public func UpdateRatings(forTrack: Track) {
         if GetLastRating(forTrack: forTrack) == nil {
-            print("Title: \(forTrack.untrackedProperties[7]) - First Rating: \(forTrack.rating)")
+            print("Title: \(forTrack.staticProperties[7]) - First Rating: \(forTrack.rating)")
             WriteRating(forTrack: forTrack)
             return
         }
         
         if GetLastRating(forTrack: forTrack) != forTrack.rating {
-            print("Title: \(forTrack.untrackedProperties[7]) - Updated Rating: \(GetLastRating(forTrack: forTrack)!) -> \(forTrack.rating)")
+            print("Title: \(forTrack.staticProperties[7]) - Updated Rating: \(GetLastRating(forTrack: forTrack)!) -> \(forTrack.rating)")
             WriteRating(forTrack: forTrack)
             return
         }

@@ -3,7 +3,7 @@ import iTunesLibrary
 let DEFAULT_RATING: Int = 50
 let DEFAULT_PLAY_COUNT: Int = 0
 
-let UNTRACKED_PROPERTIES = [
+let STATIC_PROPERTIES = [
     ITLibMediaItemPropertyAlbumTitle
     , ITLibMediaItemPropertyArtistName
     , ITLibMediaItemPropertyBitRate
@@ -18,14 +18,14 @@ let UNTRACKED_PROPERTIES = [
 
 class Track {
     public let persistentID: String
-    public let untrackedProperties: [String]
+    public let staticProperties: [String]
     public let rating: Int
     public let playCount: Int
     
     public init(fromItem: ITLibMediaItem) {
         persistentID = String(format: "%016llX", fromItem.persistentID.uint64Value)
         
-        untrackedProperties = UNTRACKED_PROPERTIES.map {
+        staticProperties = STATIC_PROPERTIES.map {
             String(describing: fromItem.value(forProperty: $0) ?? "")
         }
         
