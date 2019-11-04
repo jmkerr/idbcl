@@ -14,7 +14,7 @@ let STATIC_PROPERTIES = [
     , ITLibMediaItemPropertyTitle
     , ITLibMediaItemPropertyTotalTime
     , ITLibMediaItemPropertyYear
-] 
+]
 
 class Track {
     public let persistentID: String
@@ -22,7 +22,7 @@ class Track {
     public let rating: Int
     public let playCount: Int
     
-    public init(fromItem: ITLibMediaItem) {
+    init(fromItem: ITLibMediaItem) {
         persistentID = String(format: "%016llX", fromItem.persistentID.uint64Value)
         
         staticProperties = STATIC_PROPERTIES.map {

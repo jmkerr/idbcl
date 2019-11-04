@@ -1,21 +1,37 @@
-SCFLAGS = -v -g -Onone
 BIN = ./bin
 NAME = idbcl
-SRC = $(wildcard ./src/*.swift)
+SRC = $(wildcard Sources/$(NAME)/*.swift)
 
+LIBNAME = libIdbcl
+LIBPATH = $(BIN)/$(LIBNAME).dylib
+MODULEPATH = $(BIN)/$(LIBNAME).swiftmodule
+LIBSRC = $(wildcard Sources/$(LIBNAME)/*.swift)
 
-
-all:
+.PHONY: all
+idbcl: libIdbcl
 	$(shell mkdir -p $(BIN))
 	swiftc \
-		$(SCFLAGS) \
-		$(SRC) \
 		-o $(BIN)/$(NAME) \
-		-framework iTunesLibrary,Foundation
+		-I$(BIN) \
+		$(LIBPATH) \
+		$(SRC)
 	codesign \
-		-s "-" \
-		-v \
+		--sign "-" -v \
 		$(BIN)/$(NAME)
 
+.PHONY: libIdcl
+libIdbcl:
+	$(shell mkdir -p $(BIN))
+	swiftc \
+		-framework iTunesLibrary \
+		-emit-library \
+		-o $(LIBPATH) \
+		-emit-module \
+		-emit-module-path $(MODULEPATH) \
+		-module-name $(LIBNAME) \
+		$(LIBSRC) 
+
+.PHONY: clean
 clean:
 	rm -r $(BIN)
+

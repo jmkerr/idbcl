@@ -2,16 +2,16 @@
 .DS_Store
 .Trashes
 
-# User specific XCode data
-*.xcworkspace
-xcuserdata
+# User specific Editor data
+*.xcodeproj/
+*.swp
 
 # Derived data
-DerivedData
-idbcl.xcodeproj/xcshareddata
-bin
+DerivedData/
+bin/
+.build/
+.swiftpm/
+build/
 
-# generatedd data
-stdout
-stderr
+# Generated data
 idbcl.plist

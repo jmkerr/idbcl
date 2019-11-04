@@ -1,10 +1,10 @@
 import iTunesLibrary
 
-class MediaLibrary {
+public class MediaLibrary {
     private let lib: ITLibrary?
     private let db: Database?
     
-    init?() {
+    public init?() {
         do {
             lib = try ITLibrary(apiVersion: "1.1")
         } catch {
@@ -14,11 +14,14 @@ class MediaLibrary {
         
         if let applicationVersion: String = lib?.applicationVersion,
             let apiMajorVersion: Int = lib?.apiMajorVersion,
-            let apiMinorVersion: Int = lib?.apiMinorVersion,
-            let musicFolderLocation: URL = lib?.musicFolderLocation {
+            let apiMinorVersion: Int = lib?.apiMinorVersion {
                 print("iTunes Library Version " + applicationVersion
                     + ", API Version " + String(apiMajorVersion) + "." + String(apiMinorVersion))
-                print("In directory " + musicFolderLocation.path)
+        }
+        
+        guard let _: URL = lib?.musicFolderLocation else {
+            print("Error: No music folder.")
+            return nil
         }
         
         guard let dbPath = Configuration.dbFileURL else {

@@ -1,6 +1,21 @@
 os: osx
 osx_image:
+  - xcode11.2
   - xcode11.1
   - xcode10.3
 language: swift
-script: make
+script: 
+  # Compile, test and run using SwiftPM 5.
+  # No code signing, possible run time error depending on OS version.
+  - swift build
+  - swift test
+  - swift run
+  # Compile and run application using XCode.
+  # Some versions of XCode perform code signing.
+  - swift package generate-xcodeproj
+  - xcodebuild 
+  - ./build/Release/idbcl
+  # Compile, sign and run, most compatible
+  - make
+  - ./bin/idbcl
+

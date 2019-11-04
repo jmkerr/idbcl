@@ -1,4 +1,5 @@
 import Foundation
+import libIdbcl
 
 let dateFormatter = DateFormatter()
 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"

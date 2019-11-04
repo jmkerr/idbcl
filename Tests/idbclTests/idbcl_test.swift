@@ -1,6 +1,7 @@
 import XCTest
 import iTunesLibrary
 import Foundation
+@testable import libIdbcl
 
 class idbcl_test: XCTestCase {
     
@@ -43,3 +44,4 @@ class idbcl_test: XCTestCase {
         XCTAssert(tr.rating == DEFAULT_RATING)
     }
 }
+ 
