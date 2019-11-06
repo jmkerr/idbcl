@@ -7,7 +7,7 @@ LIBPATH = $(BIN)/$(LIBNAME).dylib
 MODULEPATH = $(BIN)/$(LIBNAME).swiftmodule
 LIBSRC = $(wildcard Sources/$(LIBNAME)/*.swift)
 
-.PHONY: all
+.PHONY: idbcl
 idbcl: libIdbcl
 	$(shell mkdir -p $(BIN))
 	swiftc \
@@ -19,7 +19,7 @@ idbcl: libIdbcl
 		--sign "-" -v \
 		$(BIN)/$(NAME)
 
-.PHONY: libIdcl
+.PHONY: libIdbcl
 libIdbcl:
 	$(shell mkdir -p $(BIN))
 	swiftc \
