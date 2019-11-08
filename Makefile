@@ -15,6 +15,10 @@ idbcl: libIdbcl
 		-I$(BIN) \
 		$(LIBPATH) \
 		$(SRC)
+	install_name_tool \
+		-change $(LIBPATH) \
+		@executable_path/$(LIBNAME).dylib \
+		$(BIN)/$(NAME)
 	codesign \
 		--sign "-" -v \
 		$(BIN)/$(NAME)

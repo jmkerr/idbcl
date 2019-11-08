@@ -24,7 +24,7 @@ public class MediaLibrary {
             return nil
         }
         
-        guard let dbPath = Configuration.dbFileURL else {
+        guard let dbPath = Configuration.dbFilePath else {
             print("Configuration error.")
             return nil
         }

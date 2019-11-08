@@ -9,6 +9,6 @@ if CommandLine.argc == 1 || CommandLine.arguments[1] == "update" {
     if let lib = MediaLibrary() {
         lib.UpdateDB()
     }
-} else if CommandLine.arguments[1] == "emit-plist" {
-    emitPlist()
+} else if CommandLine.arguments[1] == "install" {
+    install()
 }
