@@ -15,8 +15,9 @@ public class MediaLibrary {
         if let applicationVersion: String = lib?.applicationVersion,
             let apiMajorVersion: Int = lib?.apiMajorVersion,
             let apiMinorVersion: Int = lib?.apiMinorVersion {
-                print("iTunes Library Version " + applicationVersion
-                    + ", API Version " + String(apiMajorVersion) + "." + String(apiMinorVersion))
+            let msg: String = String(format: "%@: iTunesLibrary version %@, API %d.%d",
+                                     logDateString(), applicationVersion, apiMajorVersion, apiMinorVersion)
+            print(msg)
         }
         
         guard let _: URL = lib?.musicFolderLocation else {

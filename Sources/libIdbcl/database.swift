@@ -156,7 +156,7 @@ class Database {
             return
         }
         
-        if GetLastPlayCount(forTrack: forTrack) != forTrack.playCount {
+        else if GetLastPlayCount(forTrack: forTrack) != forTrack.playCount {
             print("Title: \(forTrack.staticProperties[7]) - Updated PlayCount: \(GetLastPlayCount(forTrack: forTrack)!) -> \(forTrack.playCount)")
             WritePlayCount(forTrack: forTrack)
             return
@@ -178,7 +178,7 @@ class Database {
             return
         }
         
-        if GetLastRating(forTrack: forTrack) != forTrack.rating {
+        else if GetLastRating(forTrack: forTrack) != forTrack.rating {
             print("Title: \(forTrack.staticProperties[7]) - Updated Rating: \(GetLastRating(forTrack: forTrack)!) -> \(forTrack.rating)")
             WriteRating(forTrack: forTrack)
             return
