@@ -11,7 +11,9 @@ class idbcl_test: XCTestCase {
         override func value(forProperty property: String) -> Any? {
             switch property {
             case ITLibMediaItemPropertyAlbumTitle:
-                return "foo"
+                return "foo-albumtitle"
+            case ITLibMediaItemPropertyTitle:
+                return "foo-title"
             case ITLibMediaItemPropertyBitRate:
                 return 20
             default:
@@ -30,18 +32,32 @@ class idbcl_test: XCTestCase {
         try? FileManager.default.removeItem(atPath: testDbURL.path)
     }
     
+    func testConstants() {
+        XCTAssert(ITLibMediaEntityPropertyPersistentID == "PersistentID")
+        XCTAssert(ITLibMediaItemPropertyAlbumTitle == "AlbumTitle")
+        XCTAssert(ITLibMediaItemPropertyArtistName == "Artist")
+        XCTAssert(ITLibMediaItemPropertyBitRate == "BitRate")
+        XCTAssert(ITLibMediaItemPropertyFileSize == "FileSize")
+        XCTAssert(ITLibMediaItemPropertyGenre == "Genre")
+        XCTAssert(ITLibMediaItemPropertyKind == "Kind")
+        XCTAssert(ITLibMediaItemPropertySampleRate == "SampleRate")
+        XCTAssert(ITLibMediaItemPropertyTitle == "Title")
+        XCTAssert(ITLibMediaItemPropertyTotalTime == "TotalTime")
+        XCTAssert(ITLibMediaItemPropertyYear == "Year")
+    }
+    
     func testTrack() {
         let item = ITLibMediaItemMock()
         let tr = Track(fromItem: item)
         
         XCTAssert(tr.persistentID.count == 16)
-        XCTAssert(tr.staticProperties.count == STATIC_PROPERTIES.count)
         XCTAssert(tr.persistentID == "000000000000000A")
-        XCTAssert(tr.staticProperties[0] == "foo")
-        XCTAssert(tr.staticProperties[1] == "")
-        XCTAssert(tr.staticProperties[2] == "20")
+        XCTAssert(tr.value(forProperty: "AlbumTitle") == "foo-albumtitle")
+        XCTAssert(tr.value(forProperty: "Artist") == "")
+        XCTAssert(tr.value(forProperty: "BitRate") == "20")
         XCTAssert(tr.playCount == DEFAULT_PLAY_COUNT)
         XCTAssert(tr.rating == DEFAULT_RATING)
+        XCTAssert("\(tr)" == "foo-title")
     }
 }
  

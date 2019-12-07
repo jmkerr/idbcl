@@ -16,20 +16,17 @@ let STATIC_PROPERTIES = [
     , ITLibMediaItemPropertyYear
 ]
 
-class Track {
+class Track : CustomStringConvertible {
     public let persistentID: String
-    public let staticProperties: [String]
-    public let rating: Int
-    public let playCount: Int
+    let item: ITLibMediaItem
     
     init(fromItem: ITLibMediaItem) {
+        item = fromItem
         persistentID = String(format: "%016llX", fromItem.persistentID.uint64Value)
-        
-        staticProperties = STATIC_PROPERTIES.map {
-            String(describing: fromItem.value(forProperty: $0) ?? "")
-        }
-        
-        rating = fromItem.value(forProperty: ITLibMediaItemPropertyRating) as? Int ?? DEFAULT_RATING
-        playCount = fromItem.value(forProperty: ITLibMediaItemPropertyPlayCount) as? Int ?? DEFAULT_PLAY_COUNT
     }
+
+    func value(forProperty: String) -> String { return String(describing: item.value(forProperty: forProperty) ?? "") }
+    var description: String { return String(describing: item.value(forProperty: ITLibMediaItemPropertyTitle) ?? "Untitled Track") }
+    var rating: Int { return item.value(forProperty: ITLibMediaItemPropertyRating) as? Int ?? DEFAULT_RATING }
+    var playCount: Int { return item.value(forProperty: ITLibMediaItemPropertyPlayCount) as? Int ?? DEFAULT_PLAY_COUNT }
 }

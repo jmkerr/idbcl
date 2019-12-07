@@ -1,5 +1,6 @@
 import Foundation
 import SQLite3
+import iTunesLibrary
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
@@ -20,43 +21,59 @@ class Database {
     }
     
     deinit {
+        let rowCounts = Dictionary(uniqueKeysWithValues:
+            ["Meta", "PlayCounts", "Ratings"].map { ($0, ExecuteScalarQuery(sql: "SELECT COUNT(*) FROM \($0)")!) } )
+        
+        let totalChanges = sqlite3_total_changes(db)
+        
         if sqlite3_close(db) != SQLITE_OK {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
             print("Error closing Database: \(errmsg)")
         }
+        
+        print("Closed Database, rows: \(rowCounts), writes: \(totalChanges)" )
     }
     
     private func CreateTables() {
+        /*
+         ITLibMediaEntityPropertyPersistentID == "PersistentID"
+         ITLibMediaItemPropertyAlbumTitle == "AlbumTitle"
+         ITLibMediaItemPropertyArtistName == "Artist"   (!)
+         ITLibMediaItemPropertyBitRate == "BitRate"
+         ...
+         */
         ExecuteNonQuery(sql: """
         CREATE TABLE IF NOT EXISTS Meta (
-            PersistentID TEXT PRIMARY KEY,
-            AlbumTitle TEXT,
-            ArtistName TEXT,
-            BitRate INTEGER,
-            FileSize INTEGER,
-            Genre TEXT,
-            Kind TEXT,
-            SampleRate INTEGER,
-            Title TEXT,
-            TotalTime INTEGER,
-            Year INTEGER)
+            \(ITLibMediaEntityPropertyPersistentID) TEXT PRIMARY KEY,
+            \(ITLibMediaItemPropertyAlbumTitle) TEXT,
+            \(ITLibMediaItemPropertyArtistName) TEXT,
+            \(ITLibMediaItemPropertyBitRate) INTEGER,
+            \(ITLibMediaItemPropertyFileSize) INTEGER,
+            \(ITLibMediaItemPropertyGenre) TEXT,
+            \(ITLibMediaItemPropertyKind) TEXT,
+            \(ITLibMediaItemPropertySampleRate) INTEGER,
+            \(ITLibMediaItemPropertyTitle) TEXT,
+            \(ITLibMediaItemPropertyTotalTime) INTEGER,
+            \(ITLibMediaItemPropertyYear) INTEGER)
         """)
         ExecuteNonQuery(sql: """
         CREATE TABLE IF NOT EXISTS PlayCounts (
-            PersistentID TEXT,
+            \(ITLibMediaEntityPropertyPersistentID) TEXT,
             Date INTEGER,
-            PlayCount INTEGER,
-            PRIMARY KEY (PersistentID, PlayCount))
+            \(ITLibMediaItemPropertyPlayCount) INTEGER,
+            PRIMARY KEY (\(ITLibMediaEntityPropertyPersistentID),
+                         \(ITLibMediaItemPropertyPlayCount)))
         """)
         ExecuteNonQuery(sql: """
         CREATE TABLE IF NOT EXISTS Ratings (
-            PersistentID TEXT,
+            \(ITLibMediaEntityPropertyPersistentID) TEXT,
             Date INTEGER,
-            Rating INTEGER)
+            \(ITLibMediaItemPropertyRating) INTEGER)
         """)
     }
     
-    private func ExecuteNonQuery(sql: String, params: [String] = []) {
+    @discardableResult
+    private func ExecuteNonQuery(sql: String, params: [String] = []) -> Int {
         var statement: OpaquePointer?
         sqlite3_prepare_v2(db, sql, -1, &statement, nil)
         
@@ -73,6 +90,8 @@ class Database {
             let errmsg = String(cString: sqlite3_errmsg(db))
             print("Error finalizing statement: \(errmsg)")
         }
+        
+        return Int(sqlite3_changes(db))
     }
     
     private func ExecuteScalarQuery(sql: String, params: [String] = []) -> Any? {
@@ -88,22 +107,23 @@ class Database {
         if sqlite3_step(statement) != SQLITE_ROW {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
             if errmsg != "no more rows available" {
-                print("Failed to execute scalar query: \(errmsg)")
+                print("Error: Failed to execute scalar query: \(errmsg)")
             }
             result = nil
             
         } else {
             if sqlite3_column_count(statement) != 1 {
-                print("Query provided more than one result column.")
+                print("Error: Scalar query provided more than one result column.")
                 result = nil
                 
             } else {
                 switch sqlite3_column_type(statement, 0) {
                     case SQLITE_INTEGER:
-                        result = sqlite3_column_int64(statement, 0)
+                        result = Int(sqlite3_column_int64(statement, 0))
                     case SQLITE_TEXT:
-                        result = sqlite3_column_text(statement, 0)
+                        result = String(cString: sqlite3_column_text(statement, 0)!)
                     default:
+                        print("Error: Scalar query result is not INTEGER or TEXT.")
                         result = nil
                 }
             }
@@ -137,9 +157,38 @@ class Database {
         } else { return nil }
     }
     
+    private func GetPropertyValue(forTrack: Track, forProperty: String) -> String {
+        let val = ExecuteScalarQuery(sql: "SELECT \(forProperty) FROM Meta WHERE PersistentID = ?",
+                                params: [forTrack.persistentID])
+        if let val = val as? Int { return "\(val)" }
+        else if let val = val as? String { return val }
+        else { return "" }
+    }
+    
+    @discardableResult
+    private func SetPropertyValue(forTrack: Track, forProperty: String, value: String) -> Int {
+        return ExecuteNonQuery(sql: "UPDATE Meta SET \(forProperty) = ? WHERE PersistentID = ?",
+                               params: [value, forTrack.persistentID])
+    }
+    
     public func UpdateMeta(forTrack: Track) {
-        ExecuteNonQuery(sql: "INSERT OR REPLACE INTO Meta VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        params: [forTrack.persistentID] + forTrack.staticProperties)
+        if GetPropertyValue(forTrack: forTrack, forProperty: "PersistentID") == "" {
+            let props: [String] = STATIC_PROPERTIES.map { forTrack.value(forProperty: $0) }
+            ExecuteNonQuery(sql: "INSERT INTO Meta VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            params: [forTrack.persistentID] + props)
+            print("Title: \(forTrack) - Created Metadata")
+        } else {
+            for property in STATIC_PROPERTIES {
+                let oldValue: String = GetPropertyValue(forTrack: forTrack, forProperty: property)
+                let currentValue: String = forTrack.value(forProperty: property)
+
+                if oldValue != currentValue {
+                    SetPropertyValue(forTrack: forTrack, forProperty: property, value: currentValue)
+                    print("Title: \(forTrack) - Updated \(property): \(oldValue == "" ? "NULL" : oldValue)"
+                          + " -> \(currentValue == "" ? "NULL" : currentValue)")
+                }
+            }
+        }
     }
     
     private func WritePlayCount(forTrack: Track) {
@@ -151,13 +200,13 @@ class Database {
     
     public func UpdatePlayCounts(forTrack: Track) {
         if GetLastPlayCount(forTrack: forTrack) == nil {
-            print("Title: \(forTrack.staticProperties[7]) - First PlayCount: \(forTrack.playCount)")
+            print("Title: \(forTrack) - First PlayCount: \(forTrack.playCount)")
             WritePlayCount(forTrack: forTrack)
             return
         }
         
         else if GetLastPlayCount(forTrack: forTrack) != forTrack.playCount {
-            print("Title: \(forTrack.staticProperties[7]) - Updated PlayCount: \(GetLastPlayCount(forTrack: forTrack)!) -> \(forTrack.playCount)")
+            print("Title: \(forTrack) - Updated PlayCount: \(GetLastPlayCount(forTrack: forTrack)!) -> \(forTrack.playCount)")
             WritePlayCount(forTrack: forTrack)
             return
         }
@@ -173,13 +222,13 @@ class Database {
     
     public func UpdateRatings(forTrack: Track) {
         if GetLastRating(forTrack: forTrack) == nil {
-            print("Title: \(forTrack.staticProperties[7]) - First Rating: \(forTrack.rating)")
+            print("Title: \(forTrack) - First Rating: \(forTrack.rating)")
             WriteRating(forTrack: forTrack)
             return
         }
         
         else if GetLastRating(forTrack: forTrack) != forTrack.rating {
-            print("Title: \(forTrack.staticProperties[7]) - Updated Rating: \(GetLastRating(forTrack: forTrack)!) -> \(forTrack.rating)")
+            print("Title: \(forTrack) - Updated Rating: \(GetLastRating(forTrack: forTrack)!) -> \(forTrack.rating)")
             WriteRating(forTrack: forTrack)
             return
         }
