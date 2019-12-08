@@ -2,7 +2,7 @@ import iTunesLibrary
 
 public class MediaLibrary {
     private let lib: ITLibrary?
-    private let db: Database?
+    private let db: DatabaseUpdater?
     
     public init?() {
         do {
@@ -43,7 +43,7 @@ public class MediaLibrary {
             return nil
         }
             
-        db = Database(dbFileURL: dbPath)
+        db = DatabaseUpdater(dbFileURL: dbPath)
     }
 
     public func UpdateDB() {

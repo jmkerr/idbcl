@@ -6,23 +6,22 @@ import Foundation
 class idbcl_test: XCTestCase {
     
     class ITLibMediaItemMock: ITLibMediaItem {
-        override var persistentID: NSNumber { return 10 }
+        var mockid: NSNumber = 0
+        var props: [String : Any] = [:]
         
-        override func value(forProperty property: String) -> Any? {
-            switch property {
-            case ITLibMediaItemPropertyAlbumTitle:
-                return "foo-albumtitle"
-            case ITLibMediaItemPropertyTitle:
-                return "foo-title"
-            case ITLibMediaItemPropertyBitRate:
-                return 20
-            default:
-                return nil
-            }
+        convenience init(persistentID: NSNumber = 0, props: [String : Any] = [:]) {
+            self.init()
+            self.props = props
+            self.mockid = persistentID
         }
+        
+        override var persistentID: NSNumber { return mockid }
+        
+        override func value(forProperty: String) -> Any? { return props[forProperty] }
+        
     }
-    
-    let testDbURL: URL = URL(string: NSTemporaryDirectory())!.appendingPathComponent("idbcl-test.sqlite3")
+       
+    var testDbURL: URL = URL(string: NSTemporaryDirectory())!.appendingPathComponent("idbcl-test.sqlite3")
     
     override func setUp() {
         XCTAssert(!FileManager.default.fileExists(atPath: testDbURL.path))
@@ -31,7 +30,7 @@ class idbcl_test: XCTestCase {
     override func tearDown() {
         try? FileManager.default.removeItem(atPath: testDbURL.path)
     }
-    
+       
     func testConstants() {
         XCTAssert(ITLibMediaEntityPropertyPersistentID == "PersistentID")
         XCTAssert(ITLibMediaItemPropertyAlbumTitle == "AlbumTitle")
@@ -47,17 +46,54 @@ class idbcl_test: XCTestCase {
     }
     
     func testTrack() {
-        let item = ITLibMediaItemMock()
+        let item = ITLibMediaItemMock(persistentID: 10, props: [
+            "AlbumTitle" : "foo-albumtitle",
+            "PersistentID" : 10,
+            "BitRate" : 20,
+            "Title" : "foo-title"])
         let tr = Track(fromItem: item)
         
         XCTAssert(tr.persistentID.count == 16)
         XCTAssert(tr.persistentID == "000000000000000A")
+        
         XCTAssert(tr.value(forProperty: "AlbumTitle") == "foo-albumtitle")
         XCTAssert(tr.value(forProperty: "Artist") == "")
         XCTAssert(tr.value(forProperty: "BitRate") == "20")
+        XCTAssert(tr.value(forProperty: "SampleRate") == "")
+        XCTAssert("\(tr)" == "foo-title")
+        
         XCTAssert(tr.playCount == DEFAULT_PLAY_COUNT)
         XCTAssert(tr.rating == DEFAULT_RATING)
-        XCTAssert("\(tr)" == "foo-title")
+
     }
+    
+    func testDatabaseUpdate() {
+        let tr = Track(fromItem: ITLibMediaItemMock(props: ["PlayCount" : 0]))
+        let db = DatabaseUpdater(dbFileURL: testDbURL)
+        
+        XCTAssert(db?.UpdateMeta(forTrack: tr) == 1)
+        XCTAssert(db?.UpdateMeta(forTrack: tr) == 0)
+        
+        XCTAssert(db?.UpdateRatings(forTrack: tr) == 1)
+        XCTAssert(db?.UpdateRatings(forTrack: tr) == 0)
+        
+        XCTAssert(db?.UpdatePlayCounts(forTrack: tr) == 1)
+        XCTAssert(db?.UpdatePlayCounts(forTrack: tr) == 0)
+        
+        sleep(1) // Currently requires entries to have different timestamps
+        
+        let tr_2 = Track(fromItem: ITLibMediaItemMock(props: ["PlayCount" : 1]))
+        
+        XCTAssert(db?.UpdatePlayCounts(forTrack: tr_2) == 1)
+        XCTAssert(db?.UpdatePlayCounts(forTrack: tr_2) == 0)
+        
+        
+        let tr_3 = Track(fromItem: ITLibMediaItemMock(props: ["Rating" : 20]))
+        
+        XCTAssert(db?.UpdateRatings(forTrack: tr_3) == 1)
+        XCTAssert(db?.UpdateRatings(forTrack: tr_3) == 0)
+    }
+    
+    
 }
  
