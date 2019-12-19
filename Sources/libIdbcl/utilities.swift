@@ -11,6 +11,14 @@ extension XMLElement {
         addChild(XMLElement(name: "key", stringValue: key))
         addChild(XMLElement(name: "string", stringValue: value))
     }
+    
+    func addArray(key: String, values: [String]) {
+        addChild(XMLElement(name: "key", stringValue: key))
+        
+        let arr = XMLElement(name: "array")
+        for v in values { arr.addChild(XMLElement(name: "string", stringValue: v)) }
+        addChild(arr)
+    }
 }
 
 public func createLaunchAgent() {
@@ -27,7 +35,7 @@ public func createLaunchAgent() {
     let doc = try! XMLDocument(xmlString: boilerplate)
     
     let dict = doc.rootElement()!.elements(forName: "dict")[0]
-    dict.addKeyValuePair(key: "Program", value: Configuration.executablePath.path)
+    dict.addArray(key: "ProgramArguments", values: [Configuration.executablePath.path, "update"])
     dict.addKeyValuePair(key: "StandardOutPath", value: Configuration.dataDir!.appendingPathComponent("stdout").path)
     dict.addKeyValuePair(key: "StandardErrorPath", value: Configuration.dataDir!.appendingPathComponent("stderr").path)
     

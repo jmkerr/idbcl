@@ -8,10 +8,8 @@
 
 # Derived data
 DerivedData/
-bin/
 .build/
 .swiftpm/
 build/
+Package.resolved
 
-# Generated data
-idbcl.plist

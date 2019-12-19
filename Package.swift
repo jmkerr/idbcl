@@ -11,11 +11,13 @@ let package = Package(
         .executable(name: "idbcl", targets: ["idbcl"]),
         .library(name: "libIdbcl", targets: ["libIdbcl"])
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/jakeheis/SwiftCLI", from: "5.0.0")
+    ],
     targets: [
         .target(
             name: "idbcl",
-            dependencies: ["libIdbcl"]),
+            dependencies: ["libIdbcl", "SwiftCLI"]),
         .target(
             name: "libIdbcl",
             dependencies: []),

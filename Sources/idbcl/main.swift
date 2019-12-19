@@ -1,10 +1,29 @@
 import Foundation
 import libIdbcl
+import SwiftCLI
 
-if CommandLine.argc == 1 || CommandLine.arguments[1] == "update" {
-    if let lib = MediaLibrary() {
-        lib.UpdateDB()
+class UpdateCmd: Command {
+    
+    let name = "update"
+    let shortDescription = "Creates and updates the database"
+    
+    func execute() throws {
+        if let lib = MediaLibrary() {
+            lib.UpdateDB()
+        }
     }
-} else if CommandLine.arguments[1] == "create-launchagent" {
-    createLaunchAgent()
 }
+
+class InstallCmd: Command {
+    
+    let name = "create-launchagent"
+    let shortDescription = "Creates a launchd agent property list"
+    
+    func execute() throws {
+        createLaunchAgent()
+    }
+}
+
+let cli = CLI(name: "idbcl")
+cli.commands = [UpdateCmd(), InstallCmd()]
+cli.goAndExit()
