@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.1
 
 import PackageDescription
 
@@ -12,7 +12,7 @@ let package = Package(
         .library(name: "libIdbcl", targets: ["libIdbcl"])
     ],
     dependencies: [
-        .package(url: "https://github.com/jakeheis/SwiftCLI", from: "5.0.0")
+        .package(url: "https://github.com/jakeheis/SwiftCLI", from: "6.0.0")
     ],
     targets: [
         .target(

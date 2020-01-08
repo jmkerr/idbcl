@@ -14,4 +14,4 @@ jobs:
     - name: Run tests
       run: swift test -v
     - name: Run program normally
-      run: swift run
+      run: swift run idbcl update

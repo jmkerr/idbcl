@@ -67,7 +67,7 @@ class idbcl_test: XCTestCase {
 
     }
     
-    func testDatabaseUpdate() {
+    func testDatabaseUpdater() {
         let tr = Track(fromItem: ITLibMediaItemMock(props: ["PlayCount" : 0]))
         let db = DatabaseUpdater(dbFileURL: testDbURL)
         
@@ -92,6 +92,46 @@ class idbcl_test: XCTestCase {
         
         XCTAssert(db?.UpdateRatings(forTrack: tr_3) == 1)
         XCTAssert(db?.UpdateRatings(forTrack: tr_3) == 0)
+    }
+    
+    /// Test the lower level Database with SQL-Queries.
+    func testDatabase() {
+        let db = Database(dbFileURL: testDbURL)!
+        
+        var last = db.ExecuteNonQuery(sql: "CREATE TABLE foo (a INTEGER, b INTEGER, c INTEGER, d TEXT, e TEXT, f TEXT)")
+        XCTAssert(last == 0)
+        
+        last = db.ExecuteNonQuery(sql: "INSERT INTO foo VALUES (?, ?, NULL, ?, ?, NULL)", params: ["11", "twelve", "fourteen", ""])
+        XCTAssert(last == 1)
+        
+        last = db.ExecuteNonQuery(sql: "INSERT INTO foo VALUES (?, ?, NULL, ?, ?, NULL)", params: ["21", "22", "twenty-four", "twenty-five"])
+        XCTAssert(last == 1)
+        
+        // General Query
+        let foo = db.ExecuteQuery(sql: "SELECT * FROM foo")
+        XCTAssert(foo![0][0] as? Int == 11)
+        XCTAssert(foo![0][1] as? Int == nil)
+        XCTAssert(foo![0][1] as? String == "twelve")
+        XCTAssert(foo![0][2] as? Int == nil)
+        XCTAssert(foo![0][3] as? String == "fourteen")
+        XCTAssert(foo![0][4] as? String == "")
+        XCTAssert(foo![0][5] as? String == nil)
+        
+        // Scalar Query
+        var bar = db.ExecuteScalarQuery(sql: "SELECT * FROM foo")
+        XCTAssert(bar == nil)
+        
+        bar = db.ExecuteScalarQuery(sql: "SELECT * FROM foo WHERE a LIKE '2%'")
+        XCTAssert(bar == nil)
+    
+        bar = db.ExecuteScalarQuery(sql: "SELECT a FROM foo WHERE a LIKE '2%'")
+        XCTAssert(bar as? Int == 21)
+        
+        bar = db.ExecuteScalarQuery(sql: "SELECT d FROM foo WHERE a LIKE '2%'")
+        XCTAssert(bar as? String == "twenty-four")
+    
+        bar = db.ExecuteScalarQuery(sql: "SELECT d FROM foo WHERE a LIKE '3%'")
+        XCTAssert(bar as? String == nil)
     }
     
     

@@ -5,6 +5,7 @@ Tracks iTunes/macOS Music song play count and ratings.
   * Table: `Meta`, Columns: `PersistentID, AlbumTitle, Artist, BitRate, FileSize, Genre, Kind, SampleRate, Title, TotalTime, Year`
   * Table: `PlayCounts`, Columns: `PersistentID, Date, PlayCount`
   * Table: `Ratings`, Columns: `PersistentID, Date, Rating`
+* Generates reports
 #### Usage:
 * `swift run`
 * Mojave requires a signed executable (`codesign --sign - --verbose .build/debug/idbcl`)

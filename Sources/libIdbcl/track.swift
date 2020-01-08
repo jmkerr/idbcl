@@ -3,7 +3,7 @@ import iTunesLibrary
 let DEFAULT_RATING: Int = 50
 let DEFAULT_PLAY_COUNT: Int = 0
 
-let STATIC_PROPERTIES = [
+public let PROPERTY_HEADERS = [
     ITLibMediaItemPropertyAlbumTitle
     , ITLibMediaItemPropertyArtistName
     , ITLibMediaItemPropertyBitRate

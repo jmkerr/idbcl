@@ -72,29 +72,28 @@ class DatabaseUpdater {
     
     @discardableResult
     public func UpdateMeta(forTrack: Track) -> Int {
+        var rowsChanged = 0
+
         if GetMetaPropertyValue(forTrack: forTrack, forProperty: "PersistentID") == "" {
-            let props: [String] = STATIC_PROPERTIES.map { forTrack.value(forProperty: $0) }
-            let res = db.ExecuteNonQuery(sql: "INSERT INTO Meta VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            let props: [String] = PROPERTY_HEADERS.map { forTrack.value(forProperty: $0) }
+            rowsChanged = db.ExecuteNonQuery(sql: "INSERT INTO Meta VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                          params: [forTrack.persistentID] + props)
             print("Title: \(forTrack) - Created Metadata")
-            return res
             
         } else {
-            var res = 0
-            for property in STATIC_PROPERTIES {
+            for property in PROPERTY_HEADERS {
                 let oldValue: String = GetMetaPropertyValue(forTrack: forTrack, forProperty: property)
                 let currentValue: String = forTrack.value(forProperty: property)
 
                 if oldValue != currentValue {
-                    res += UpdateMetaPropertyValue(forTrack: forTrack, forProperty: property, value: currentValue)
+                    rowsChanged += UpdateMetaPropertyValue(forTrack: forTrack, forProperty: property, value: currentValue)
                     print("Title: \(forTrack) - Updated \(property): \(oldValue == "" ? "NULL" : oldValue)"
                           + " -> \(currentValue == "" ? "NULL" : currentValue)")
                 }
-            return res
             }
         }
         
-        return 0
+        return rowsChanged
     }
     
     private func GetLastPropertyValue(forTrack: Track, forProperty: String) -> Int? {

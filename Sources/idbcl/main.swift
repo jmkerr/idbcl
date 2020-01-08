@@ -24,6 +24,99 @@ class InstallCmd: Command {
     }
 }
 
+class LogCmd: Command {
+    
+    let name = "log"
+    let shortDescription: String = "Show changes to the database"
+    
+    @Key("-l", "--limit", description: "Limit the number of entries show (default: 10)")
+    var candidatelimit: Int?
+    let defaultLimit = 10
+    
+    func execute() throws {
+        let limit = candidatelimit ?? defaultLimit
+        
+        if let stat = Reporter() {
+            let log = stat.log(limit: limit)
+            
+            for (date, type, title, value) in log {
+                // TODO: prettier date
+                print("\(date)",
+                      type.padding(toLength: 9, withPad: " ", startingAt: 0),
+                      title.padding(toLength: 24, withPad: " ", startingAt: 0),
+                      String(format: "%6d", value))
+            }
+        }
+    }
+}
+
+class ReportCmd: Command {
+    
+    let name = "report"
+    let shortDescription = "List song groups sorted by property delta."
+    
+    @Key("-t", "--timeframe", description: "Time frame in days (default: 30.0)")
+    var timeframe: Double?
+    let defaultTimeframe = 30.0
+    
+    @Key("-g", "--group-by", description: "Group tracks by common property, like 'AlbumTitle' (default: no grouping)")
+    var candidateGroupingProperty: String?
+    let defaultGroupingProperty = "PersistentIDAndTitle"
+    
+    @Key("-s", "--sort-by", description: "Sort groups by property (default: 'PlayCount')")
+    var candidateSortingProperty: String?
+    let defaultSortingProperty = "PlayCount"
+    
+    @Key("-l", "--limit", description: "Limit the number of entries displayed (default: 10)")
+    var limit: Int?
+    let defaultLimit = 10
+    
+    @Flag("-r", "--reverse", description: "Reverse list")
+    var reverse: Bool
+    
+    func execute() throws {
+        // Verify input
+        let groupingProperty = candidateGroupingProperty ?? defaultGroupingProperty
+        
+        let groupingOptions = PROPERTY_HEADERS + ["PersistentID", "PersistentIDAndTitle", "CurrentRating", "CurrentPlayCount", "Decade", "TotalMinutes"]
+        if !groupingOptions.contains(groupingProperty) {
+            print("Error: Invalid grouping property. Expect one of \(groupingOptions)")
+            return
+        }
+        
+        let sortingProperty = candidateSortingProperty ?? defaultSortingProperty
+        let sortingOptions = ["PlayCount", "Rating", "PlayTime"]
+        if !sortingOptions.contains(sortingProperty) {
+            print("Error: Invalid sorting property. Expect one of \(sortingOptions)")
+            return
+        }
+        //
+        
+        if let stat = Reporter() {
+            let to: Int = Int(Date().timeIntervalSince1970)
+            let from: Int = to - Int((timeframe ?? defaultTimeframe) * 24 * 3600)
+            
+            var top = stat.report(groupBy: groupingProperty,
+                               sortBy: sortingProperty,
+                               from: from,
+                               to: to)
+            
+            if reverse { top.reverse() }
+            
+            // Print header row
+            let pad: (String) -> String = { $0.padding(toLength: 32, withPad: " ", startingAt: 0) }
+            let unit = sortingProperty == "PlayTime" ? " (m)" : "-Δ"
+            print(pad(groupingProperty + " (\(top.count))"), sortingProperty + unit)
+            
+            // Print table, hiding decimals in play counts
+            let valueFormatting = sortingProperty == "PlayCount" ? "%6.0f" : "%6.2f"
+            for (key, value) in top.prefix(limit ?? defaultLimit) {
+                print(pad(key), String(format: valueFormatting, value))
+            }
+        }
+    }
+}
+
 let cli = CLI(name: "idbcl")
-cli.commands = [UpdateCmd(), InstallCmd()]
+cli.commands = [UpdateCmd(), InstallCmd(), LogCmd(), ReportCmd()]
 cli.goAndExit()

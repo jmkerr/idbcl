@@ -3,6 +3,7 @@ import SQLite3
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
+/// Provides methods to execute SQL-Queries
 class Database {
     private var db: OpaquePointer?
 
@@ -20,6 +21,54 @@ class Database {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
             print("Error closing Database: \(errmsg)")
         }
+    }
+    
+    /// General SQL query
+    /// - parameter sql: SQL query
+    /// - parameter params: Optional strings to bind to the parameter tokens in the query
+    /// - returns: nil, or result table
+    
+    public func ExecuteQuery(sql: String, params: [String] = []) -> [[Any?]]? {
+        // TODO: implementation (return tuples?)
+        
+        var statement: OpaquePointer?
+        sqlite3_prepare_v2(db, sql, -1, &statement, nil)
+        
+        for (pos, param) in params.enumerated() {
+            sqlite3_bind_text(statement, Int32(pos+1), param, -1, SQLITE_TRANSIENT)
+        }
+        
+        var result: [[Any?]]? = nil
+
+        while sqlite3_step(statement) == SQLITE_ROW {
+            result = result == nil ? [] : result
+            
+            let cols = sqlite3_column_count(statement)
+            var row: [Any?] = []
+            
+            for col in 0...cols-1 {
+                switch sqlite3_column_type(statement, col) {
+                    case SQLITE_NULL:
+                        row.append(nil)
+                    case SQLITE_INTEGER:
+                        row.append(Int(sqlite3_column_int64(statement, col)))
+                    case SQLITE_TEXT:
+                        row.append(String(cString: sqlite3_column_text(statement, col)!))
+                    default:
+                        print("Error: Database field type is not INTEGER or TEXT.")
+                        result = nil
+                }
+            }
+            
+            result?.append(row)
+        }
+        
+        if sqlite3_finalize(statement) != SQLITE_OK {
+            let errmsg = String(cString: sqlite3_errmsg(db))
+            print("Error finalizing statement: \(errmsg)")
+        }
+        
+        return result
     }
     
     public var totalChanges: Int { return Int(sqlite3_total_changes(db)) }
@@ -40,7 +89,7 @@ class Database {
         
         if sqlite3_step(statement) != SQLITE_DONE {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
-            print("Failed to execute non query: \(errmsg)")
+            print("Error: Failed to execute non query: \(errmsg)")
         }
         
         if sqlite3_finalize(statement) != SQLITE_OK {
@@ -57,46 +106,24 @@ class Database {
     /// - returns: Any errors result in nil
     
     public func ExecuteScalarQuery(sql: String, params: [String] = []) -> Any? {
-        var statement: OpaquePointer?
-        sqlite3_prepare_v2(db, sql, -1, &statement, nil)
+       
+        guard let table = ExecuteQuery(sql: sql, params: params) else { return nil }
         
-        for (pos, param) in params.enumerated() {
-            sqlite3_bind_text(statement, Int32(pos+1), param, -1, SQLITE_TRANSIENT)
+        if table.count == 0 { return nil }
+        else if table.count > 1 {
+            print("Error: Scalar query provided more than one result row.")
+            return nil
         }
         
-        var result: Any?
-
-        if sqlite3_step(statement) != SQLITE_ROW {
-            let errmsg = String(cString: sqlite3_errmsg(db)!)
-            if errmsg != "no more rows available" {
-                print("Error: Failed to execute scalar query: \(errmsg)")
-            }
-            result = nil
-            
-        } else {
-            if sqlite3_column_count(statement) != 1 {
-                print("Error: Scalar query provided more than one result column.")
-                result = nil
-                
-            } else {
-                switch sqlite3_column_type(statement, 0) {
-                    case SQLITE_INTEGER:
-                        result = Int(sqlite3_column_int64(statement, 0))
-                    case SQLITE_TEXT:
-                        result = String(cString: sqlite3_column_text(statement, 0)!)
-                    default:
-                        print("Error: Scalar query result is not INTEGER or TEXT.")
-                        result = nil
-                }
-            }
+        let row = table[0]
+        
+        if row.count == 0 { return nil }
+        else if row.count > 1 {
+            print("Error: Scalar query provided more than one result column.")
+            return nil
         }
         
-        if sqlite3_finalize(statement) != SQLITE_OK {
-            let errmsg = String(cString: sqlite3_errmsg(db))
-            print("Error finalizing statement: \(errmsg)")
-        }
-        
-        return result
+        return row[0]
     }
     
 
