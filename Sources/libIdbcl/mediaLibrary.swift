@@ -4,7 +4,7 @@ public class MediaLibrary {
     private let lib: ITLibrary?
     private let db: DatabaseUpdater?
     
-    public init?() {
+    public init?(dbUrl: URL) {
         do {
             lib = try ITLibrary(apiVersion: "1.1")
         } catch {
@@ -14,9 +14,12 @@ public class MediaLibrary {
         
         if let applicationVersion: String = lib?.applicationVersion,
             let apiMajorVersion: Int = lib?.apiMajorVersion,
-            let apiMinorVersion: Int = lib?.apiMinorVersion {
+            let apiMinorVersion: Int = lib?.apiMinorVersion
+        {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
             let msg: String = String(format: "%@: iTunesLibrary version %@, API %d.%d",
-                                     logDateString(), applicationVersion, apiMajorVersion, apiMinorVersion)
+                                     df.string(from: Date()), applicationVersion, apiMajorVersion, apiMinorVersion)
             print(msg)
         }
         
@@ -25,13 +28,8 @@ public class MediaLibrary {
             return nil
         }
         
-        guard let dbPath = Configuration.dbFilePath else {
-            print("Configuration error.")
-            return nil
-        }
-        
         do {
-            let dbDirectory: URL = dbPath.deletingLastPathComponent()
+            let dbDirectory: URL = dbUrl.deletingLastPathComponent()
             try FileManager.default.createDirectory(at: dbDirectory,
                                                         withIntermediateDirectories: false,
                                                         attributes: nil)
@@ -43,7 +41,7 @@ public class MediaLibrary {
             return nil
         }
             
-        db = DatabaseUpdater(dbFileURL: dbPath)
+        db = DatabaseUpdater(dbFileURL: dbUrl)
     }
 
     public func UpdateDB() {

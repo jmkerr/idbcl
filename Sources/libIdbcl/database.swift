@@ -28,7 +28,7 @@ class Database {
     /// - parameter params: Optional strings to bind to the parameter tokens in the query
     /// - returns: nil, or result table
     
-    public func ExecuteQuery(sql: String, params: [String] = []) -> [[Any?]]? {
+    public func ExecuteQuery(sql: String, params: [String?] = []) -> [[Any?]]? {
         // TODO: implementation (return tuples?)
         
         var statement: OpaquePointer?
@@ -79,7 +79,7 @@ class Database {
     /// - returns: No of rows changed in INSERT, UPDATE, or DELETE statements
     
     @discardableResult
-    public func ExecuteNonQuery(sql: String, params: [String] = []) -> Int {
+    public func ExecuteNonQuery(sql: String, params: [String?] = []) -> Int {
         var statement: OpaquePointer?
         sqlite3_prepare_v2(db, sql, -1, &statement, nil)
         
@@ -105,7 +105,7 @@ class Database {
     /// - parameter params: Optional strings to bind to the parameter tokens in the query
     /// - returns: Any errors result in nil
     
-    public func ExecuteScalarQuery(sql: String, params: [String] = []) -> Any? {
+    public func ExecuteScalarQuery(sql: String, params: [String?] = []) -> Any? {
        
         guard let table = ExecuteQuery(sql: sql, params: params) else { return nil }
         

@@ -8,7 +8,7 @@ class UpdateCmd: Command {
     let shortDescription = "Creates and updates the database"
     
     func execute() throws {
-        if let lib = MediaLibrary() {
+        if let lib = MediaLibrary(dbUrl: Configuration.dbFilePath!) {
             lib.UpdateDB()
         }
     }
@@ -19,9 +19,7 @@ class InstallCmd: Command {
     let name = "create-launchagent"
     let shortDescription = "Creates a launchd agent property list"
     
-    func execute() throws {
-        createLaunchAgent()
-    }
+    func execute() throws { createLaunchAgent() }
 }
 
 class LogCmd: Command {
@@ -36,12 +34,17 @@ class LogCmd: Command {
     func execute() throws {
         let limit = candidatelimit ?? defaultLimit
         
-        if let stat = Reporter() {
+        if let stat = Reporter(dbUrl: Configuration.dbFilePath!) {
             let log = stat.log(limit: limit)
             
+            let df = DateFormatter()
+            df.dateStyle = .short
+            df.timeStyle = .short
+            df.locale = .current
+            df.doesRelativeDateFormatting = true
+            
             for (date, type, title, value) in log {
-                // TODO: prettier date
-                print("\(date)",
+                print(df.string(from: date),
                       type.padding(toLength: 9, withPad: " ", startingAt: 0),
                       title.padding(toLength: 24, withPad: " ", startingAt: 0),
                       String(format: "%6d", value))
@@ -59,7 +62,7 @@ class ReportCmd: Command {
     var timeframe: Double?
     let defaultTimeframe = 30.0
     
-    @Key("-g", "--group-by", description: "Group tracks by common property, like 'AlbumTitle' (default: no grouping)")
+    @Key("-g", "--group-by", description: "Group tracks by common property, like 'AlbumTitle' (default: no grouping). 'Help' for options.")
     var candidateGroupingProperty: String?
     let defaultGroupingProperty = "PersistentIDAndTitle"
     
@@ -92,7 +95,7 @@ class ReportCmd: Command {
         }
         //
         
-        if let stat = Reporter() {
+        if let stat = Reporter(dbUrl: Configuration.dbFilePath!) {
             let to: Int = Int(Date().timeIntervalSince1970)
             let from: Int = to - Int((timeframe ?? defaultTimeframe) * 24 * 3600)
             

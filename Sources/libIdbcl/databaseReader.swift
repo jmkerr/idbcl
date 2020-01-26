@@ -1,13 +1,10 @@
+import Foundation
+
 class DatabaseReader {
     let db: Database
     
-    public init?() {
-        guard let dbPath = Configuration.dbFilePath else {
-            print("Configuration error.")
-            return nil
-        }
-        
-        if let db = Database(dbFileURL: dbPath) { self.db = db }
+    public init?(dbUrl: URL) {
+        if let db = Database(dbFileURL: dbUrl) { self.db = db }
         else { return nil }
     }
     

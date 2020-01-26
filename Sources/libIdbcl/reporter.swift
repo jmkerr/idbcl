@@ -30,7 +30,7 @@ struct DatabaseTrack {
         
         if PROPERTY_HEADERS.contains(forProperty) {
             let index = PROPERTY_HEADERS.firstIndex(of: forProperty)! + 1
-            return String(describing: meta[index] ?? "")
+            return String(describing: meta[index] ?? "No Value")
             
         } else if forProperty == "PersistentID" {
             return String(describing: meta[0]!)
@@ -47,12 +47,12 @@ struct DatabaseTrack {
         } else if forProperty == "Decade" {
             if let year = Int(value(forProperty: "Year")) {
                 return String(year/10*10)
-            } else { return "N/A" }
+            } else { return "No Value" }
         
         } else if forProperty == "TotalMinutes" {
             if let pt = Double(value(forProperty: "TotalTime")) {
                 return String(Int(round(pt/1000/60)))
-            } else { return "N/A" }
+            } else { return "No Value" }
             
         } else {
             print("Error: DatabaseTrack.value() for this property not implemented.")
@@ -96,8 +96,8 @@ public class Reporter {
     private let db: DatabaseReader
     let tracks: [DatabaseTrack]
     
-    public init?() {
-        if let db = DatabaseReader() { self.db = db }
+    public init?(dbUrl: URL) {
+        if let db = DatabaseReader(dbUrl: dbUrl) { self.db = db }
         else { return nil }
         
         let meta = self.db.GetMeta()
@@ -139,7 +139,7 @@ public class Reporter {
             ($0.value(forProperty: "PersistentID"), $0.value(forProperty: "Title"))
         }) )
         
-        let tab = Array((playCounts+ratings).sorted(by: { ($0.0 > $1.0) }).prefix(limit))
+        let tab = Array((playCounts + ratings).sorted(by: { $0.0 > $1.0 }).prefix(limit))
         
         let tab2 = tab.map({ (Date(timeIntervalSince1970: Double($0.0)),
                               $0.1,

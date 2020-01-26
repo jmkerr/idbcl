@@ -25,7 +25,11 @@ class Track : CustomStringConvertible {
         persistentID = String(format: "%016llX", fromItem.persistentID.uint64Value)
     }
 
-    func value(forProperty: String) -> String { return String(describing: item.value(forProperty: forProperty) ?? "") }
+    func value(forProperty: String) -> String? {
+        if let value: Any = item.value(forProperty: forProperty) {
+            return String(describing: value)
+        } else { return nil }
+    }
     
     var description: String { return String(describing: item.value(forProperty: ITLibMediaItemPropertyTitle) ?? "Untitled Track") }
     

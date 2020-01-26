@@ -56,16 +56,16 @@ class DatabaseUpdater {
         """)
     }
     
-    private func GetMetaPropertyValue(forTrack: Track, forProperty: String) -> String {
+    private func GetMetaPropertyValue(forTrack: Track, forProperty: String) -> String? {
         let val = db.ExecuteScalarQuery(sql: "SELECT \(forProperty) FROM Meta WHERE PersistentID = ?",
                                 params: [forTrack.persistentID])
         if let val = val as? Int { return "\(val)" }
         else if let val = val as? String { return val }
-        else { return "" }
+        else { return nil }
     }
     
     @discardableResult
-    private func UpdateMetaPropertyValue(forTrack: Track, forProperty: String, value: String) -> Int {
+    private func UpdateMetaPropertyValue(forTrack: Track, forProperty: String, value: String?) -> Int {
         return db.ExecuteNonQuery(sql: "UPDATE Meta SET \(forProperty) = ? WHERE PersistentID = ?",
                                params: [value, forTrack.persistentID])
     }
@@ -74,21 +74,22 @@ class DatabaseUpdater {
     public func UpdateMeta(forTrack: Track) -> Int {
         var rowsChanged = 0
 
-        if GetMetaPropertyValue(forTrack: forTrack, forProperty: "PersistentID") == "" {
-            let props: [String] = PROPERTY_HEADERS.map { forTrack.value(forProperty: $0) }
+        if GetMetaPropertyValue(forTrack: forTrack, forProperty: "PersistentID") == nil {
+            let props: [String?] = PROPERTY_HEADERS.map { forTrack.value(forProperty: $0) }
             rowsChanged = db.ExecuteNonQuery(sql: "INSERT INTO Meta VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                          params: [forTrack.persistentID] + props)
             print("Title: \(forTrack) - Created Metadata")
             
         } else {
             for property in PROPERTY_HEADERS {
-                let oldValue: String = GetMetaPropertyValue(forTrack: forTrack, forProperty: property)
-                let currentValue: String = forTrack.value(forProperty: property)
+                let oldValue: String? = GetMetaPropertyValue(forTrack: forTrack, forProperty: property)
+                let currentValue: String? = forTrack.value(forProperty: property)
 
                 if oldValue != currentValue {
                     rowsChanged += UpdateMetaPropertyValue(forTrack: forTrack, forProperty: property, value: currentValue)
-                    print("Title: \(forTrack) - Updated \(property): \(oldValue == "" ? "NULL" : oldValue)"
-                          + " -> \(currentValue == "" ? "NULL" : currentValue)")
+                    
+                    print("Title: \(forTrack) - Updated \(property): \(oldValue ?? "NULL")"
+                          + " -> \(currentValue ?? "NULL")")
                 }
             }
         }

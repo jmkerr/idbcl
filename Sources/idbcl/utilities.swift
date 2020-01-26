@@ -1,11 +1,5 @@
 import Foundation
 
-public func logDateString() -> String {
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-    return dateFormatter.string(from: Date())
-}
-
 extension XMLElement {
     func addKeyValuePair(key: String, value: String) {
         addChild(XMLElement(name: "key", stringValue: key))
@@ -34,8 +28,13 @@ public func createLaunchAgent() {
     
     let doc = try! XMLDocument(xmlString: boilerplate)
     
+    guard let exe = Bundle.main.executableURL else {
+        print("Error getting path to executable.")
+        return
+    }
+    
     let dict = doc.rootElement()!.elements(forName: "dict")[0]
-    dict.addArray(key: "ProgramArguments", values: [Configuration.executablePath.path, "update"])
+    dict.addArray(key: "ProgramArguments", values: [exe.path, "update"])
     dict.addKeyValuePair(key: "StandardOutPath", value: Configuration.dataDir!.appendingPathComponent("stdout").path)
     dict.addKeyValuePair(key: "StandardErrorPath", value: Configuration.dataDir!.appendingPathComponent("stderr").path)
     

@@ -57,9 +57,9 @@ class idbcl_test: XCTestCase {
         XCTAssert(tr.persistentID == "000000000000000A")
         
         XCTAssert(tr.value(forProperty: "AlbumTitle") == "foo-albumtitle")
-        XCTAssert(tr.value(forProperty: "Artist") == "")
+        XCTAssert(tr.value(forProperty: "Artist") == nil)
         XCTAssert(tr.value(forProperty: "BitRate") == "20")
-        XCTAssert(tr.value(forProperty: "SampleRate") == "")
+        XCTAssert(tr.value(forProperty: "SampleRate") == nil)
         XCTAssert("\(tr)" == "foo-title")
         
         XCTAssert(tr.playCount == DEFAULT_PLAY_COUNT)
@@ -92,6 +92,22 @@ class idbcl_test: XCTestCase {
         
         XCTAssert(db?.UpdateRatings(forTrack: tr_3) == 1)
         XCTAssert(db?.UpdateRatings(forTrack: tr_3) == 0)
+        
+        sleep(1)
+        
+        // Output of Reporter.log()
+        let reporter = Reporter(dbUrl: testDbURL)!
+        let log: [(Date, String, String, Int)] = reporter.log(limit: 10)
+        
+        XCTAssertEqual(log.count, 4)
+        XCTAssertEqual(log[0].1, "PlayCount")
+        XCTAssertEqual(log[0].3, 1)
+        XCTAssertEqual(log[1].1, "Rating")
+        XCTAssertEqual(log[1].3, 20)
+        XCTAssertEqual(log[2].1, "PlayCount")
+        XCTAssertEqual(log[2].3, 0)
+        XCTAssertEqual(log[3].1, "Rating")
+        XCTAssertEqual(log[3].3, 50)
     }
     
     /// Test the lower level Database with SQL-Queries.
