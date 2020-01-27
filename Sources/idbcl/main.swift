@@ -62,9 +62,9 @@ class ReportCmd: Command {
     var timeframe: Double?
     let defaultTimeframe = 30.0
     
-    @Key("-g", "--group-by", description: "Group tracks by common property, like 'AlbumTitle' (default: no grouping). 'Help' for options.")
+    @Key("-g", "--group-by", description: "Group tracks by common property, like 'AlbumTitle' (default: 'ArtistAndTitle'). 'Help' for options.")
     var candidateGroupingProperty: String?
-    let defaultGroupingProperty = "PersistentIDAndTitle"
+    let defaultGroupingProperty = "ArtistAndTitle"
     
     @Key("-s", "--sort-by", description: "Sort groups by property (default: 'PlayCount')")
     var candidateSortingProperty: String?
@@ -81,7 +81,7 @@ class ReportCmd: Command {
         // Verify input
         let groupingProperty = candidateGroupingProperty ?? defaultGroupingProperty
         
-        let groupingOptions = PROPERTY_HEADERS + ["PersistentID", "PersistentIDAndTitle", "CurrentRating", "CurrentPlayCount", "Decade", "TotalMinutes"]
+        let groupingOptions = PROPERTY_HEADERS + ["ArtistAndTitle", "Decade", "CurrentPlayCount", "CurrentRating", "PersistentID", "PersistentIDAndTitle",  "TotalMinutes"]
         if !groupingOptions.contains(groupingProperty) {
             print("Error: Invalid grouping property. Expect one of \(groupingOptions)")
             return

@@ -32,22 +32,25 @@ struct DatabaseTrack {
             let index = PROPERTY_HEADERS.firstIndex(of: forProperty)! + 1
             return String(describing: meta[index] ?? "No Value")
             
+        } else if forProperty == "ArtistAndTitle" {
+            return "\(value(forProperty: "Artist")) - \(value(forProperty: "Title"))"
+        
+        } else if forProperty == "Decade" {
+            if let year = Int(value(forProperty: "Year")) {
+                return String(year/10*10)
+            } else { return "No Value" }
+            
+        } else if forProperty == "CurrentPlayCount" {
+            return String(PlayCount())
+                    
+        } else if forProperty == "CurrentRating" {
+            return String(Double(Rating())/20)
+            
         } else if forProperty == "PersistentID" {
             return String(describing: meta[0]!)
         
         } else if forProperty == "PersistentIDAndTitle" {
             return "\(value(forProperty: "PersistentID")) (\(value(forProperty: "Title")))"
-            
-        } else if forProperty == "CurrentRating" {
-            return String(Double(Rating())/20)
-            
-        } else if forProperty == "CurrentPlayCount" {
-            return String(PlayCount())
-                        
-        } else if forProperty == "Decade" {
-            if let year = Int(value(forProperty: "Year")) {
-                return String(year/10*10)
-            } else { return "No Value" }
         
         } else if forProperty == "TotalMinutes" {
             if let pt = Double(value(forProperty: "TotalTime")) {

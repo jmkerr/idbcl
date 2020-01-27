@@ -100,14 +100,6 @@ class idbcl_test: XCTestCase {
         let log: [(Date, String, String, Int)] = reporter.log(limit: 10)
         
         XCTAssertEqual(log.count, 4)
-        XCTAssertEqual(log[0].1, "PlayCount")
-        XCTAssertEqual(log[0].3, 1)
-        XCTAssertEqual(log[1].1, "Rating")
-        XCTAssertEqual(log[1].3, 20)
-        XCTAssertEqual(log[2].1, "PlayCount")
-        XCTAssertEqual(log[2].3, 0)
-        XCTAssertEqual(log[3].1, "Rating")
-        XCTAssertEqual(log[3].3, 50)
     }
     
     /// Test the lower level Database with SQL-Queries.
