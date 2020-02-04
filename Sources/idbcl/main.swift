@@ -74,6 +74,9 @@ class ReportCmd: Command {
     var limit: Int?
     let defaultLimit = 10
     
+    @Flag("-c", "--count", description: "Show the number of IDs in each group.")
+    var count: Bool
+    
     @Flag("-r", "--reverse", description: "Reverse list")
     var reverse: Bool
     
@@ -102,19 +105,25 @@ class ReportCmd: Command {
             var top = stat.report(groupBy: groupingProperty,
                                sortBy: sortingProperty,
                                from: from,
-                               to: to)
+                               to: to,
+                               count: count)
             
             if reverse { top.reverse() }
+            let groupCount = top.count
+            top = Array(top.prefix(limit ?? defaultLimit))
             
             // Print header row
-            let pad: (String) -> String = { $0.padding(toLength: 32, withPad: " ", startingAt: 0) }
+            let padLength = max(top.max(by: { $0.0.count < $1.0.count })?.0.count ?? 0, 32)
+            let pad: (String) -> String = { $0.padding(toLength: padLength, withPad: " ", startingAt: 0) }
             let unit = sortingProperty == "PlayTime" ? " (m)" : "-Δ"
-            print(pad(groupingProperty + " (\(top.count))"), sortingProperty + unit)
+            print("   #", pad(groupingProperty + " (\(groupCount))"), sortingProperty + unit)
             
             // Print table, hiding decimals in play counts
             let valueFormatting = sortingProperty == "PlayCount" ? "%6.0f" : "%6.2f"
-            for (key, value) in top.prefix(limit ?? defaultLimit) {
-                print(pad(key), String(format: valueFormatting, value))
+            for (index, (key, value)) in top.enumerated() {
+                print(String(format: "%4d", index),
+                      pad(key),
+                      String(format: valueFormatting, value))
             }
         }
     }

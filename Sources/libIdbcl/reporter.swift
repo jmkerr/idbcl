@@ -68,6 +68,8 @@ struct PlayList {
     let name: String
     let tracks: [DatabaseTrack]
     
+    var count: Int { return tracks.count }
+    
     func TotalPlayCount(date: Int) -> Int {
         return tracks.reduce(0, { $0 + $1.PlayCount(date: date) })
     }
@@ -96,26 +98,30 @@ struct PlayList {
 }
 
 public class Reporter {
-    private let db: DatabaseReader
     let tracks: [DatabaseTrack]
+    let playCounts: [(String, Int, Int)]
+    let ratings: [(String, Int, Int)]
     
     public init?(dbUrl: URL) {
-        if let db = DatabaseReader(dbUrl: dbUrl) { self.db = db }
+        guard let db = DatabaseReader(dbUrl: dbUrl)
         else { return nil }
         
-        let meta = self.db.GetMeta()
-        let playCounts = Dictionary(grouping: self.db.GetPlayCounts(), by: { $0.0 })
-        let ratings = Dictionary(grouping: self.db.GetRatings(), by: { $0.0 })
+        let meta = db.GetMeta()
+        playCounts = db.GetPlayCounts()
+        ratings = db.GetRatings()
+        
+        let playCountsById = Dictionary(grouping: playCounts, by: { $0.0 })
+        let ratingsById = Dictionary(grouping: ratings, by: { $0.0 })
     
         tracks = meta.map({
             let pid = $0[0] as! String // TODO: Nil & Sanity check
             return DatabaseTrack(meta: $0,
-                                 playCounts: playCounts[pid] ?? [],
-                                 ratings: ratings[pid] ?? [])
+                                 playCounts: playCountsById[pid] ?? [],
+                                 ratings: ratingsById[pid] ?? [])
         })
     }
     
-    public func report(groupBy: String, sortBy: String, from: Int, to: Int) -> [(String, Double)] {
+    public func report(groupBy: String, sortBy: String, from: Int, to: Int, count: Bool = true) -> [(String, Double)] {
         
         var lists: [String : [DatabaseTrack]] = [:]
         
@@ -127,7 +133,8 @@ public class Reporter {
         let plists: [PlayList] = lists.map({ PlayList(name: $0, tracks: $1) })
     
         var top: [(String, Double)] = plists.map {
-            ($0.name, $0.value(forProperty: sortBy, date: to) - $0.value(forProperty: sortBy, date: from))
+            ($0.name + (count ? " (\($0.count))" : ""),
+             $0.value(forProperty: sortBy, date: to) - $0.value(forProperty: sortBy, date: from))
         }
         
         top.sort(by: { $0.1 > $1.1 })
@@ -136,13 +143,13 @@ public class Reporter {
     }
       
     public func log(limit: Int) -> [(Date, String, String, Int)] {
-        let playCounts = db.GetPlayCounts().map({ ($0.1, "PlayCount", $0.0, $0.2) })
-        let ratings = db.GetRatings().map({ ($0.1, "Rating", $0.0, $0.2) })
+        let playCountsLog = playCounts.map({ ($0.1, "PlayCount", $0.0, $0.2) })
+        let ratingsLog = ratings.map({ ($0.1, "Rating", $0.0, $0.2) })
         let titles = Dictionary(uniqueKeysWithValues: tracks.map({
             ($0.value(forProperty: "PersistentID"), $0.value(forProperty: "Title"))
         }) )
         
-        let tab = Array((playCounts + ratings).sorted(by: { $0.0 > $1.0 }).prefix(limit))
+        let tab = Array((playCountsLog + ratingsLog).sorted(by: { $0.0 > $1.0 }).prefix(limit))
         
         let tab2 = tab.map({ (Date(timeIntervalSince1970: Double($0.0)),
                               $0.1,
