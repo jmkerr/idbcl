@@ -9,7 +9,7 @@ class UpdateCmd: Command {
     
     func execute() throws {
         if let lib = MediaLibrary(dbUrl: Configuration.dbFilePath!) {
-            lib.UpdateDB()
+            lib.updateDB()
         }
     }
 }

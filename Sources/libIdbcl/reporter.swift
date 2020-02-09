@@ -1,9 +1,11 @@
 import Foundation
 
-struct DatabaseTrack {
+public struct DatabaseTrack {
     let meta: [Any?]
     let playCounts: [(String, Int, Int)]
     let ratings: [(String, Int, Int)]
+    
+    var id: String { String(describing: meta[0]!) }
     
     init(meta: [Any?], playCounts: [(String, Int, Int)], ratings: [(String, Int, Int)]) {
         self.playCounts = playCounts.sorted(by: { $0.1 > $1.1 })
@@ -11,55 +13,66 @@ struct DatabaseTrack {
         self.meta = meta
     }
     
-    func PlayCount(date: Int = Int(Date().timeIntervalSince1970)) -> Int {
+    func PlayCount(date: Int = Int(Date().timeIntervalSince1970)) -> Int? {
         let bestPc = playCounts.first(where: { $0.1 < date })
-        if let pc = bestPc { return pc.2 } else { return DEFAULT_PLAY_COUNT }
+        if let pc = bestPc { return pc.2 } else { return nil }
     }
     
-    func Rating(date: Int = Int(Date().timeIntervalSince1970)) -> Int {
+    func Rating(date: Int = Int(Date().timeIntervalSince1970)) -> Int? {
         let bestRating = ratings.first(where: { $0.1 < date })
-        if let r = bestRating { return r.2 } else { return DEFAULT_RATING }
+        if let r = bestRating { return r.2 } else { return nil }
     }
     
     func PlayTime(date: Int) -> Int {
-        let totalTime = Int(value(forProperty: "TotalTime")) ?? 0
-        return totalTime * PlayCount(date: date)
+        let totalTime = Int(group(groupName: "TotalTime")) ?? 0
+        return totalTime * (PlayCount(date: date) ?? DEFAULT_PLAY_COUNT)
     }
     
-    func value(forProperty: String) -> String {
-        
+    func value(forProperty: String) -> String? {
         if PROPERTY_HEADERS.contains(forProperty) {
             let index = PROPERTY_HEADERS.firstIndex(of: forProperty)! + 1
-            return String(describing: meta[index] ?? "No Value")
             
-        } else if forProperty == "ArtistAndTitle" {
-            return "\(value(forProperty: "Artist")) - \(value(forProperty: "Title"))"
+            if let value: Any = meta[index] { return String(describing: value) }
+        }
+        return nil
+    }
+    
+    func group(groupName: String) -> String {
+        let missing = "No Value"
         
-        } else if forProperty == "Decade" {
-            if let year = Int(value(forProperty: "Year")) {
+        if PROPERTY_HEADERS.contains(groupName) {
+            if let group = value(forProperty: groupName) { return String(describing: group) }
+            else { return missing }
+        }
+            
+        else if groupName == "ArtistAndTitle" {
+            return "\(group(groupName: "Artist")) - \(group(groupName: "Title"))"
+        
+        } else if groupName == "Decade" {
+            if let year = Int(group(groupName: "Year")) {
                 return String(year/10*10)
-            } else { return "No Value" }
+            } else { return missing }
             
-        } else if forProperty == "CurrentPlayCount" {
-            return String(PlayCount())
+        } else if groupName == "CurrentPlayCount" {
+            return String(PlayCount() ?? DEFAULT_PLAY_COUNT)
                     
-        } else if forProperty == "CurrentRating" {
-            return String(Double(Rating())/20)
+        } else if groupName == "CurrentRating" {
+            return String(Double(Rating() ?? DEFAULT_RATING)/20)
             
-        } else if forProperty == "PersistentID" {
-            return String(describing: meta[0]!)
+        } else if groupName == "PersistentID" {
+            return id
         
-        } else if forProperty == "PersistentIDAndTitle" {
-            return "\(value(forProperty: "PersistentID")) (\(value(forProperty: "Title")))"
+        } else if groupName == "PersistentIDAndTitle" {
+            return "\(group(groupName: "PersistentID")) (\(group(groupName: "Title")))"
         
-        } else if forProperty == "TotalMinutes" {
-            if let pt = Double(value(forProperty: "TotalTime")) {
+        } else if groupName == "TotalMinutes" {
+            if let pt = Double(group(groupName: "TotalTime")) {
                 return String(Int(round(pt/1000/60)))
-            } else { return "No Value" }
+            } else { return missing }
             
         } else {
-            print("Error: DatabaseTrack.value() for this property not implemented.")
-            return ""
+            print("Error: Grouping by \(groupName) not implemented.")
+            return "Error"
         }
     }
 }
@@ -71,11 +84,11 @@ struct PlayList {
     var count: Int { return tracks.count }
     
     func TotalPlayCount(date: Int) -> Int {
-        return tracks.reduce(0, { $0 + $1.PlayCount(date: date) })
+        return tracks.reduce(0, { $0 + ($1.PlayCount(date: date) ?? DEFAULT_PLAY_COUNT)})
     }
     
     func AvgRating(date: Int) -> Double {
-        return Double(tracks.reduce(0, { $0 + $1.Rating(date: date)}))/20.0/Double(tracks.count)
+        return Double(tracks.reduce(0, { $0 + ($1.Rating(date: date) ?? DEFAULT_RATING)}))/20.0/Double(tracks.count)
     }
     
     func TotalPlayTime(date: Int) -> Double {
@@ -102,13 +115,18 @@ public class Reporter {
     let playCounts: [(String, Int, Int)]
     let ratings: [(String, Int, Int)]
     
-    public init?(dbUrl: URL) {
-        guard let db = DatabaseReader(dbUrl: dbUrl)
+    public convenience init?(dbUrl: URL) {
+        guard let db = DbTables(dbUrl: dbUrl)
         else { return nil }
         
-        let meta = db.GetMeta()
-        playCounts = db.GetPlayCounts()
-        ratings = db.GetRatings()
+        self.init(db: db)
+    }
+    
+    init(db: DbTables) {
+        
+        let meta = db.getMeta()
+        playCounts = db.getPlayCounts()
+        ratings = db.getRatings()
         
         let playCountsById = Dictionary(grouping: playCounts, by: { $0.0 })
         let ratingsById = Dictionary(grouping: ratings, by: { $0.0 })
@@ -121,12 +139,16 @@ public class Reporter {
         })
     }
     
+    public func getTrack(id: String) -> DatabaseTrack? {
+        return tracks.first(where: { $0.id == id })
+    }
+
     public func report(groupBy: String, sortBy: String, from: Int, to: Int, count: Bool = true) -> [(String, Double)] {
         
         var lists: [String : [DatabaseTrack]] = [:]
         
         for track in tracks {
-            let prop = track.value(forProperty: groupBy)
+            let prop = track.group(groupName: groupBy)
             lists.updateValue((lists[prop] ?? []) + [track], forKey: prop)
         }
         
@@ -146,7 +168,7 @@ public class Reporter {
         let playCountsLog = playCounts.map({ ($0.1, "PlayCount", $0.0, $0.2) })
         let ratingsLog = ratings.map({ ($0.1, "Rating", $0.0, $0.2) })
         let titles = Dictionary(uniqueKeysWithValues: tracks.map({
-            ($0.value(forProperty: "PersistentID"), $0.value(forProperty: "Title"))
+            ($0.group(groupName: "PersistentID"), $0.group(groupName: "Title"))
         }) )
         
         let tab = Array((playCountsLog + ratingsLog).sorted(by: { $0.0 > $1.0 }).prefix(limit))

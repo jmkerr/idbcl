@@ -2,7 +2,7 @@ import iTunesLibrary
 
 public class MediaLibrary {
     private let lib: ITLibrary?
-    private let db: DatabaseUpdater?
+    private let dbUrl: URL
     
     public init?(dbUrl: URL) {
         do {
@@ -28,8 +28,8 @@ public class MediaLibrary {
             return nil
         }
         
+        let dbDirectory: URL = dbUrl.deletingLastPathComponent()
         do {
-            let dbDirectory: URL = dbUrl.deletingLastPathComponent()
             try FileManager.default.createDirectory(at: dbDirectory,
                                                         withIntermediateDirectories: false,
                                                         attributes: nil)
@@ -37,23 +37,23 @@ public class MediaLibrary {
         } catch CocoaError.fileWriteFileExists {
             // Ignore error
         } catch {
-            print("Error creating directory: \(error)")
+            print("Error creating directory \(dbDirectory): \(error)")
             return nil
         }
             
-        db = DatabaseUpdater(dbFileURL: dbUrl)
+        self.dbUrl = dbUrl
     }
 
-    public func UpdateDB() {
+    public func updateDB() {
         if let mediaItems = lib?.allMediaItems,
-            let db = db {
+            let db = Updater(dbFileURL: self.dbUrl) {
             let songItems = mediaItems.filter { $0.mediaKind == ITLibMediaItemMediaKind.kindSong }
             if songItems.count > 0 {
                 for item in songItems {
                     let tr = Track(fromItem: item)
-                    db.UpdateMeta(forTrack: tr)
-                    db.UpdatePlayCounts(forTrack: tr)
-                    db.UpdateRatings(forTrack: tr)
+                    db.updateMeta(forTrack: tr)
+                    db.updatePlayCounts(forTrack: tr)
+                    db.updateRatings(forTrack: tr)
                 }
             } else {
                 print("The iTunes-Library appears to be empty.")

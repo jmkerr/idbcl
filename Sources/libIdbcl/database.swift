@@ -1,5 +1,6 @@
 import Foundation
 import SQLite3
+import iTunesLibrary
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
@@ -26,9 +27,9 @@ class Database {
     /// General SQL query
     /// - parameter sql: SQL query
     /// - parameter params: Optional strings to bind to the parameter tokens in the query
-    /// - returns: nil, or result table
+    /// - returns: nil if the table does not exist, or result table, represented by [] if empty
     
-    public func ExecuteQuery(sql: String, params: [String?] = []) -> [[Any?]]? {
+    public func executeQuery(sql: String, params: [String?] = []) -> [[Any?]]? {
         // TODO: implementation (return tuples?)
         
         var statement: OpaquePointer?
@@ -38,10 +39,9 @@ class Database {
             sqlite3_bind_text(statement, Int32(pos+1), param, -1, SQLITE_TRANSIENT)
         }
         
-        var result: [[Any?]]? = nil
+        var result: [[Any?]]? = []
 
-        while sqlite3_step(statement) == SQLITE_ROW {
-            result = result == nil ? [] : result
+        getRows: while sqlite3_step(statement) == SQLITE_ROW {
             
             let cols = sqlite3_column_count(statement)
             var row: [Any?] = []
@@ -57,6 +57,7 @@ class Database {
                     default:
                         print("Error: Database field type is not INTEGER or TEXT.")
                         result = nil
+                        break getRows
                 }
             }
             
@@ -79,7 +80,7 @@ class Database {
     /// - returns: No of rows changed in INSERT, UPDATE, or DELETE statements
     
     @discardableResult
-    public func ExecuteNonQuery(sql: String, params: [String?] = []) -> Int {
+    public func executeNonQuery(sql: String, params: [String?] = []) -> Int {
         var statement: OpaquePointer?
         sqlite3_prepare_v2(db, sql, -1, &statement, nil)
         
@@ -105,9 +106,9 @@ class Database {
     /// - parameter params: Optional strings to bind to the parameter tokens in the query
     /// - returns: Any errors result in nil
     
-    public func ExecuteScalarQuery(sql: String, params: [String?] = []) -> Any? {
+    public func executeScalarQuery(sql: String, params: [String?] = []) -> Any? {
        
-        guard let table = ExecuteQuery(sql: sql, params: params) else { return nil }
+        guard let table = executeQuery(sql: sql, params: params) else { return nil }
         
         if table.count == 0 { return nil }
         else if table.count > 1 {

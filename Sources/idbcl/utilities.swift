@@ -22,7 +22,7 @@ public func createLaunchAgent() {
     <plist version="1.0"><dict>
         <key>Label</key>                <string>idbcl</string>
         <key>RunAtLoad</key>            <true/>
-        <key>StartInterval</key>        <integer>3456</integer>
+        <key>StartInterval</key>        <integer>12345</integer>
     </dict></plist>
     """
     

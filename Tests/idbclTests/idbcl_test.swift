@@ -25,6 +25,8 @@ class idbcl_test: XCTestCase {
     
     override func setUp() {
         XCTAssert(!FileManager.default.fileExists(atPath: testDbURL.path))
+        
+        libIdbcl.MOCK_DATE = true
     }
 
     override func tearDown() {
@@ -68,37 +70,38 @@ class idbcl_test: XCTestCase {
     }
     
     func testDatabaseUpdater() {
-        let tr = Track(fromItem: ITLibMediaItemMock(props: ["PlayCount" : 0]))
-        let db = DatabaseUpdater(dbFileURL: testDbURL)
         
-        XCTAssert(db?.UpdateMeta(forTrack: tr) == 1)
-        XCTAssert(db?.UpdateMeta(forTrack: tr) == 0)
+        var tr = Track(fromItem: ITLibMediaItemMock())
         
-        XCTAssert(db?.UpdateRatings(forTrack: tr) == 1)
-        XCTAssert(db?.UpdateRatings(forTrack: tr) == 0)
+        if let db = Updater(dbFileURL: testDbURL) {
+            XCTAssertEqual(db.updateMeta(forTrack: tr), 1)
+            XCTAssertEqual(db.updateRatings(forTrack: tr), 1)
+            XCTAssertEqual(db.updatePlayCounts(forTrack: tr), 1)
+        }
         
-        XCTAssert(db?.UpdatePlayCounts(forTrack: tr) == 1)
-        XCTAssert(db?.UpdatePlayCounts(forTrack: tr) == 0)
+        if let db = Updater(dbFileURL: testDbURL) {
+            XCTAssertEqual(db.updateMeta(forTrack: tr), 0)
+            XCTAssertEqual(db.updateRatings(forTrack: tr), 0)
+            XCTAssertEqual(db.updatePlayCounts(forTrack: tr), 0)
+        }
+
+        tr = Track(fromItem: ITLibMediaItemMock(props: ["PlayCount" : 1, "Rating" : 20]))
         
-        sleep(1) // Currently requires entries to have different timestamps
-        
-        let tr_2 = Track(fromItem: ITLibMediaItemMock(props: ["PlayCount" : 1]))
-        
-        XCTAssert(db?.UpdatePlayCounts(forTrack: tr_2) == 1)
-        XCTAssert(db?.UpdatePlayCounts(forTrack: tr_2) == 0)
-        
-        
-        let tr_3 = Track(fromItem: ITLibMediaItemMock(props: ["Rating" : 20]))
-        
-        XCTAssert(db?.UpdateRatings(forTrack: tr_3) == 1)
-        XCTAssert(db?.UpdateRatings(forTrack: tr_3) == 0)
-        
-        sleep(1)
+        if let db = Updater(dbFileURL: testDbURL) {
+            XCTAssertEqual(db.updateMeta(forTrack: tr), 0)
+            XCTAssertEqual(db.updateRatings(forTrack: tr), 1)
+            XCTAssertEqual(db.updatePlayCounts(forTrack: tr), 1)
+        }
+               
+        if let db = Updater(dbFileURL: testDbURL) {
+            XCTAssertEqual(db.updateMeta(forTrack: tr), 0)
+            XCTAssertEqual(db.updateRatings(forTrack: tr), 0)
+            XCTAssertEqual(db.updatePlayCounts(forTrack: tr), 0)
+        }
         
         // Output of Reporter.log()
         let reporter = Reporter(dbUrl: testDbURL)!
         let log: [(Date, String, String, Int)] = reporter.log(limit: 10)
-        
         XCTAssertEqual(log.count, 4)
     }
     
@@ -106,17 +109,17 @@ class idbcl_test: XCTestCase {
     func testDatabase() {
         let db = Database(dbFileURL: testDbURL)!
         
-        var last = db.ExecuteNonQuery(sql: "CREATE TABLE foo (a INTEGER, b INTEGER, c INTEGER, d TEXT, e TEXT, f TEXT)")
+        var last = db.executeNonQuery(sql: "CREATE TABLE foo (a INTEGER, b INTEGER, c INTEGER, d TEXT, e TEXT, f TEXT)")
         XCTAssert(last == 0)
         
-        last = db.ExecuteNonQuery(sql: "INSERT INTO foo VALUES (?, ?, NULL, ?, ?, NULL)", params: ["11", "twelve", "fourteen", ""])
+        last = db.executeNonQuery(sql: "INSERT INTO foo VALUES (?, ?, NULL, ?, ?, NULL)", params: ["11", "twelve", "fourteen", ""])
         XCTAssert(last == 1)
         
-        last = db.ExecuteNonQuery(sql: "INSERT INTO foo VALUES (?, ?, NULL, ?, ?, NULL)", params: ["21", "22", "twenty-four", "twenty-five"])
+        last = db.executeNonQuery(sql: "INSERT INTO foo VALUES (?, ?, NULL, ?, ?, NULL)", params: ["21", "22", "twenty-four", "twenty-five"])
         XCTAssert(last == 1)
         
         // General Query
-        let foo = db.ExecuteQuery(sql: "SELECT * FROM foo")
+        let foo = db.executeQuery(sql: "SELECT * FROM foo")
         XCTAssert(foo![0][0] as? Int == 11)
         XCTAssert(foo![0][1] as? Int == nil)
         XCTAssert(foo![0][1] as? String == "twelve")
@@ -126,20 +129,29 @@ class idbcl_test: XCTestCase {
         XCTAssert(foo![0][5] as? String == nil)
         
         // Scalar Query
-        var bar = db.ExecuteScalarQuery(sql: "SELECT * FROM foo")
+        var bar = db.executeScalarQuery(sql: "SELECT * FROM foo")
         XCTAssert(bar == nil)
         
-        bar = db.ExecuteScalarQuery(sql: "SELECT * FROM foo WHERE a LIKE '2%'")
+        bar = db.executeScalarQuery(sql: "SELECT * FROM foo WHERE a LIKE '2%'")
         XCTAssert(bar == nil)
     
-        bar = db.ExecuteScalarQuery(sql: "SELECT a FROM foo WHERE a LIKE '2%'")
+        bar = db.executeScalarQuery(sql: "SELECT a FROM foo WHERE a LIKE '2%'")
         XCTAssert(bar as? Int == 21)
         
-        bar = db.ExecuteScalarQuery(sql: "SELECT d FROM foo WHERE a LIKE '2%'")
+        bar = db.executeScalarQuery(sql: "SELECT d FROM foo WHERE a LIKE '2%'")
         XCTAssert(bar as? String == "twenty-four")
     
-        bar = db.ExecuteScalarQuery(sql: "SELECT d FROM foo WHERE a LIKE '3%'")
+        bar = db.executeScalarQuery(sql: "SELECT d FROM foo WHERE a LIKE '3%'")
         XCTAssert(bar as? String == nil)
+        
+        
+        // Empty Table
+        last = db.executeNonQuery(sql: "CREATE TABLE bar (a INTEGER, b TEXT)")
+        XCTAssertEqual(last, 1)
+        
+        let foo2 = db.executeQuery(sql: "SELECT * FROM bar")
+        XCTAssertNotNil(foo2)
+        XCTAssertEqual(foo2!.count, 0)
     }
     
     
