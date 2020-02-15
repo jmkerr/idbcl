@@ -13,67 +13,71 @@ public struct DatabaseTrack {
         self.meta = meta
     }
     
-    func PlayCount(date: Int = Int(Date().timeIntervalSince1970)) -> Int? {
+    func playCount(date: Int = Int(Date().timeIntervalSince1970)) -> Int? {
         let bestPc = playCounts.first(where: { $0.1 < date })
         if let pc = bestPc { return pc.2 } else { return nil }
     }
     
-    func Rating(date: Int = Int(Date().timeIntervalSince1970)) -> Int? {
+    func rating(date: Int = Int(Date().timeIntervalSince1970)) -> Int? {
         let bestRating = ratings.first(where: { $0.1 < date })
         if let r = bestRating { return r.2 } else { return nil }
     }
     
-    func PlayTime(date: Int) -> Int {
-        let totalTime = Int(group(groupName: "TotalTime")) ?? 0
-        return totalTime * (PlayCount(date: date) ?? DEFAULT_PLAY_COUNT)
+    func playTime(date: Int) -> Int {
+        if let totalTime = value(forProperty: "TotalTime") {
+            return (Int(totalTime) ?? 0) * (playCount(date: date) ?? DEFAULT_PLAY_COUNT)
+        } else { return 0 }
     }
     
-    func value(forProperty: String) -> String? {
-        if PROPERTY_HEADERS.contains(forProperty) {
-            let index = PROPERTY_HEADERS.firstIndex(of: forProperty)! + 1
-            
-            if let value: Any = meta[index] { return String(describing: value) }
+    func value(forProperty property: String) -> String? {
+        if let index = PROPERTY_HEADERS.firstIndex(of: property) {
+            if let value: Any = meta[index + 1] {
+                return String(describing: value)
+            }
         }
         return nil
     }
+}
+
+func group(track: DatabaseTrack, groups: [String]) -> String {
+    return groups.reduce("", { ($0.count == 0 ? "" : "\($0) - ") + group(track: track, groupName: $1) })
+}
     
-    func group(groupName: String) -> String {
-        let missing = "No Value"
-        
-        if PROPERTY_HEADERS.contains(groupName) {
-            if let group = value(forProperty: groupName) { return String(describing: group) }
-            else { return missing }
+func group(track: DatabaseTrack, groupName: String) -> String {
+    let missing = "No Value"
+    
+    if PROPERTY_HEADERS.contains(groupName) {
+        if let group = track.value(forProperty: groupName) { return String(describing: group) }
+        return missing
+    }
+    else if groupName == "Decade" {
+        if let year = track.value(forProperty: "Year") {
+            if let nyear = Int(year) { return String(nyear / 10 * 10) }
         }
-            
-        else if groupName == "ArtistAndTitle" {
-            return "\(group(groupName: "Artist")) - \(group(groupName: "Title"))"
+        return missing
         
-        } else if groupName == "Decade" {
-            if let year = Int(group(groupName: "Year")) {
-                return String(year/10*10)
-            } else { return missing }
-            
-        } else if groupName == "CurrentPlayCount" {
-            return String(PlayCount() ?? DEFAULT_PLAY_COUNT)
-                    
-        } else if groupName == "CurrentRating" {
-            return String(Double(Rating() ?? DEFAULT_RATING)/20)
-            
-        } else if groupName == "PersistentID" {
-            return id
+    } else if groupName == "PlayCount" {
+        if let pc = track.playCount() { return String(pc) }
+        return missing
+                
+    } else if groupName == "Rating" {
+        if let rating = track.rating() { return String(Double(rating)/20) }
+        return missing
         
-        } else if groupName == "PersistentIDAndTitle" {
-            return "\(group(groupName: "PersistentID")) (\(group(groupName: "Title")))"
-        
-        } else if groupName == "TotalMinutes" {
-            if let pt = Double(group(groupName: "TotalTime")) {
-                return String(Int(round(pt/1000/60)))
-            } else { return missing }
-            
-        } else {
-            print("Error: Grouping by \(groupName) not implemented.")
-            return "Error"
+    } else if groupName == "PersistentID" {
+        return track.id
+    
+    } else if groupName == "TotalMinutes" {
+        if let tt = track.value(forProperty: "TotalTime") {
+            if let ntt = Double(tt) {
+                return String(Int(round(ntt / 1000 / 60)))
+            }
         }
+        return missing
+        
+    } else {
+        print("Error: Grouping by \(groupName) not implemented.")
+        return missing
     }
 }
 
@@ -84,19 +88,19 @@ struct PlayList {
     var count: Int { return tracks.count }
     
     func TotalPlayCount(date: Int) -> Int {
-        return tracks.reduce(0, { $0 + ($1.PlayCount(date: date) ?? DEFAULT_PLAY_COUNT)})
+        return tracks.reduce(0, { $0 + ($1.playCount(date: date) ?? DEFAULT_PLAY_COUNT)})
     }
     
     func AvgRating(date: Int) -> Double {
-        return Double(tracks.reduce(0, { $0 + ($1.Rating(date: date) ?? DEFAULT_RATING)}))/20.0/Double(tracks.count)
+        return Double(tracks.reduce(0, { $0 + ($1.rating(date: date) ?? DEFAULT_RATING)}))/20.0/Double(tracks.count)
     }
     
     func TotalPlayTime(date: Int) -> Double {
-        return tracks.reduce(0.0, { $0 + Double($1.PlayTime(date: date))})/1000/60
+        return tracks.reduce(0.0, { $0 + Double($1.playTime(date: date))})/1000/60
     }
     
-    func value(forProperty: String, date: Int) -> Double {
-        switch forProperty {
+    func value(forProperty property: String, date: Int) -> Double {
+        switch property {
         case "PlayCount":
             return Double(TotalPlayCount(date: date))
         case "Rating":
@@ -143,16 +147,10 @@ public class Reporter {
         return tracks.first(where: { $0.id == id })
     }
 
-    public func report(groupBy: String, sortBy: String, from: Int, to: Int, count: Bool = true) -> [(String, Double)] {
+    public func report(groupBy: [String], sortBy: String, from: Int, to: Int, count: Bool = true) -> [(String, Double)] {
         
-        var lists: [String : [DatabaseTrack]] = [:]
-        
-        for track in tracks {
-            let prop = track.group(groupName: groupBy)
-            lists.updateValue((lists[prop] ?? []) + [track], forKey: prop)
-        }
-        
-        let plists: [PlayList] = lists.map({ PlayList(name: $0, tracks: $1) })
+        let groupedTracks = Dictionary(grouping: tracks, by: { group(track: $0, groups: groupBy) })
+        let plists: [PlayList] = groupedTracks.map({ PlayList(name: $0, tracks: $1) })
     
         var top: [(String, Double)] = plists.map {
             ($0.name + (count ? " (\($0.count))" : ""),
@@ -168,7 +166,7 @@ public class Reporter {
         let playCountsLog = playCounts.map({ ($0.1, "PlayCount", $0.0, $0.2) })
         let ratingsLog = ratings.map({ ($0.1, "Rating", $0.0, $0.2) })
         let titles = Dictionary(uniqueKeysWithValues: tracks.map({
-            ($0.group(groupName: "PersistentID"), $0.group(groupName: "Title"))
+            (group(track: $0, groupName: "PersistentID"), group(track: $0, groupName: "Title"))
         }) )
         
         let tab = Array((playCountsLog + ratingsLog).sorted(by: { $0.0 > $1.0 }).prefix(limit))

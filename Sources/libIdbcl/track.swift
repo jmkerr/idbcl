@@ -25,8 +25,8 @@ class Track : CustomStringConvertible {
         persistentID = String(format: "%016llX", fromItem.persistentID.uint64Value)
     }
 
-    func value(forProperty: String) -> String? {
-        if let value: Any = item.value(forProperty: forProperty) {
+    func value(forProperty property: String) -> String? {
+        if let value: Any = item.value(forProperty: property) {
             return String(describing: value)
         } else { return nil }
     }

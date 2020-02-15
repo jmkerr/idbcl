@@ -27,7 +27,7 @@ class LogCmd: Command {
     let name = "log"
     let shortDescription: String = "Show changes to the database"
     
-    @Key("-l", "--limit", description: "Limit the number of entries show (default: 10)")
+    @Key("-l", "--limit", description: "Limit the number of entries shown (default: 10)")
     var candidatelimit: Int?
     let defaultLimit = 10
     
@@ -56,15 +56,15 @@ class LogCmd: Command {
 class ReportCmd: Command {
     
     let name = "report"
-    let shortDescription = "List song groups sorted by property delta."
+    let shortDescription = "Group and rank"
     
     @Key("-t", "--timeframe", description: "Time frame in days (default: 30.0)")
     var timeframe: Double?
     let defaultTimeframe = 30.0
     
-    @Key("-g", "--group-by", description: "Group tracks by common property, like 'AlbumTitle' (default: 'ArtistAndTitle'). 'Help' for options.")
+    @Key("-g", "--group-by", description: "Group tracks by the intersection of their properties, like 'AlbumTitle' (default: 'Artist,Title'). 'Help' for options.")
     var candidateGroupingProperty: String?
-    let defaultGroupingProperty = "ArtistAndTitle"
+    let defaultGroupingProperty = "Artist,Title"
     
     @Key("-s", "--sort-by", description: "Sort groups by property (default: 'PlayCount')")
     var candidateSortingProperty: String?
@@ -84,10 +84,15 @@ class ReportCmd: Command {
         // Verify input
         let groupingProperty = candidateGroupingProperty ?? defaultGroupingProperty
         
-        let groupingOptions = PROPERTY_HEADERS + ["ArtistAndTitle", "Decade", "CurrentPlayCount", "CurrentRating", "PersistentID", "PersistentIDAndTitle",  "TotalMinutes"]
-        if !groupingOptions.contains(groupingProperty) {
-            print("Error: Invalid grouping property. Expect one of \(groupingOptions)")
-            return
+        let groupByIntersecting = groupingProperty.components(separatedBy: ",")
+        
+        let groupingOptions = PROPERTY_HEADERS + ["Decade", "PlayCount", "Rating", "PersistentID",  "TotalMinutes"]
+        
+        for group in groupByIntersecting {
+            if !groupingOptions.contains(group) {
+                print("Error: Invalid grouping property '\(group)'. Expected comma separated list of \(groupingOptions)")
+                return
+            }
         }
         
         let sortingProperty = candidateSortingProperty ?? defaultSortingProperty
@@ -102,7 +107,7 @@ class ReportCmd: Command {
             let to: Int = Int(Date().timeIntervalSince1970)
             let from: Int = to - Int((timeframe ?? defaultTimeframe) * 24 * 3600)
             
-            var top = stat.report(groupBy: groupingProperty,
+            var top = stat.report(groupBy: groupByIntersecting,
                                sortBy: sortingProperty,
                                from: from,
                                to: to,

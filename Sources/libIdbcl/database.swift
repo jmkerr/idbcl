@@ -1,6 +1,5 @@
 import Foundation
 import SQLite3
-import iTunesLibrary
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
@@ -30,7 +29,6 @@ class Database {
     /// - returns: nil if the table does not exist, or result table, represented by [] if empty
     
     public func executeQuery(sql: String, params: [String?] = []) -> [[Any?]]? {
-        // TODO: implementation (return tuples?)
         
         var statement: OpaquePointer?
         sqlite3_prepare_v2(db, sql, -1, &statement, nil)

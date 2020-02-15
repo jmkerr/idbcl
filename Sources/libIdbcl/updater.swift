@@ -14,25 +14,25 @@ class Updater {
     }
        
     @discardableResult
-    public func updateMeta(forTrack: Track) -> Int {
+    public func updateMeta(forTrack track: Track) -> Int {
         var rowsChanged = 0
         
-        if let dbTrack = reporter.getTrack(id: forTrack.persistentID) {
+        if let dbTrack = reporter.getTrack(id: track.persistentID) {
             for property in PROPERTY_HEADERS {
                 let oldValue: String? = dbTrack.value(forProperty: property)
-                let currentValue: String? = forTrack.value(forProperty: property)
+                let currentValue: String? = track.value(forProperty: property)
 
                 if oldValue != currentValue {
-                    rowsChanged += dbTables.setMeta(id: forTrack.persistentID, property: property, value: currentValue)
+                    rowsChanged += dbTables.setMeta(id: track.persistentID, property: property, value: currentValue)
                     
-                    print("Title: \(forTrack) - Updated \(property): \(oldValue ?? "NULL")"
+                    print("Title: \(track) - Updated \(property): \(oldValue ?? "NULL")"
                           + " -> \(currentValue ?? "NULL")")
                 }
             }
         } else {
-            let props: [String?] = PROPERTY_HEADERS.map { forTrack.value(forProperty: $0) }
-            rowsChanged = dbTables.setMeta(values: [forTrack.persistentID] + props)
-            print("Title: \(forTrack) - Created Metadata")
+            let props: [String?] = PROPERTY_HEADERS.map { track.value(forProperty: $0) }
+            rowsChanged = dbTables.setMeta(values: [track.persistentID] + props)
+            print("Title: \(track) - Created Metadata")
             self.reporter = Reporter(db: self.dbTables)
         }
         
@@ -47,14 +47,14 @@ class Updater {
     }
     
     @discardableResult
-    public func updatePlayCounts(forTrack: Track) -> Int {
-        if let dbTrack = reporter.getTrack(id: forTrack.persistentID) {
-            let last: Int? = dbTrack.PlayCount()
-            let current = forTrack.playCount
+    public func updatePlayCounts(forTrack track: Track) -> Int {
+        if let dbTrack = reporter.getTrack(id: track.persistentID) {
+            let last: Int? = dbTrack.playCount()
+            let current = track.playCount
             
             if last != current {
-                let res: Int = dbTables.setPlayCount(id: forTrack.persistentID, value: current)
-                if res == 1 { printUpdate(forTrack: forTrack, forProperty: "PlayCount", previous: last, current: current) }
+                let res: Int = dbTables.setPlayCount(id: track.persistentID, value: current)
+                if res == 1 { printUpdate(forTrack: track, forProperty: "PlayCount", previous: last, current: current) }
                 return res
             }
         }
@@ -63,14 +63,14 @@ class Updater {
     }
     
     @discardableResult
-    public func updateRatings(forTrack: Track) -> Int {
-        if let dbTrack = reporter.getTrack(id: forTrack.persistentID) {
-            let last: Int? = dbTrack.Rating()
-            let current = forTrack.rating
+    public func updateRatings(forTrack track: Track) -> Int {
+        if let dbTrack = reporter.getTrack(id: track.persistentID) {
+            let last: Int? = dbTrack.rating()
+            let current = track.rating
             
             if last != current {
-                let res: Int = dbTables.setRating(id: forTrack.persistentID, value: current)
-                if res == 1 { printUpdate(forTrack: forTrack, forProperty: "Rating", previous: last, current: current) }
+                let res: Int = dbTables.setRating(id: track.persistentID, value: current)
+                if res == 1 { printUpdate(forTrack: track, forProperty: "Rating", previous: last, current: current) }
                 return res
             }
         }

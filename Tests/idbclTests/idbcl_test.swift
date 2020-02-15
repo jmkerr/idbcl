@@ -20,18 +20,32 @@ class idbcl_test: XCTestCase {
         override func value(forProperty: String) -> Any? { return props[forProperty] }
         
     }
-       
-    var testDbURL: URL = URL(string: NSTemporaryDirectory())!.appendingPathComponent("idbcl-test.sqlite3")
-    
-    override func setUp() {
-        XCTAssert(!FileManager.default.fileExists(atPath: testDbURL.path))
+
+    func temporaryFile() -> URL {
+        let dir = NSTemporaryDirectory()
+        let filename = UUID().uuidString
+        let fileURL = URL(fileURLWithPath: dir).appendingPathComponent(filename)
         
+        addTeardownBlock {
+            do {
+                let fm = FileManager.default
+                if fm.fileExists(atPath: fileURL.path) {
+                    try fm.removeItem(at: fileURL)
+                    XCTAssertFalse(fm.fileExists(atPath: fileURL.path))
+                }
+            } catch {
+                XCTFail("Error deleting temporary file \(error)")
+            }
+        }
+            
+        return fileURL
+    }
+
+    override func setUp() {
         libIdbcl.MOCK_DATE = true
     }
 
-    override func tearDown() {
-        try? FileManager.default.removeItem(atPath: testDbURL.path)
-    }
+    override func tearDown() {}
        
     func testConstants() {
         XCTAssert(ITLibMediaEntityPropertyPersistentID == "PersistentID")
@@ -70,16 +84,16 @@ class idbcl_test: XCTestCase {
     }
     
     func testDatabaseUpdater() {
-        
+        let dbFile = temporaryFile()
         var tr = Track(fromItem: ITLibMediaItemMock())
         
-        if let db = Updater(dbFileURL: testDbURL) {
+        if let db = Updater(dbFileURL: dbFile) {
             XCTAssertEqual(db.updateMeta(forTrack: tr), 1)
             XCTAssertEqual(db.updateRatings(forTrack: tr), 1)
             XCTAssertEqual(db.updatePlayCounts(forTrack: tr), 1)
         }
         
-        if let db = Updater(dbFileURL: testDbURL) {
+        if let db = Updater(dbFileURL: dbFile) {
             XCTAssertEqual(db.updateMeta(forTrack: tr), 0)
             XCTAssertEqual(db.updateRatings(forTrack: tr), 0)
             XCTAssertEqual(db.updatePlayCounts(forTrack: tr), 0)
@@ -87,32 +101,32 @@ class idbcl_test: XCTestCase {
 
         tr = Track(fromItem: ITLibMediaItemMock(props: ["PlayCount" : 1, "Rating" : 20]))
         
-        if let db = Updater(dbFileURL: testDbURL) {
+        if let db = Updater(dbFileURL: dbFile) {
             XCTAssertEqual(db.updateMeta(forTrack: tr), 0)
             XCTAssertEqual(db.updateRatings(forTrack: tr), 1)
             XCTAssertEqual(db.updatePlayCounts(forTrack: tr), 1)
         }
                
-        if let db = Updater(dbFileURL: testDbURL) {
+        if let db = Updater(dbFileURL: dbFile) {
             XCTAssertEqual(db.updateMeta(forTrack: tr), 0)
             XCTAssertEqual(db.updateRatings(forTrack: tr), 0)
             XCTAssertEqual(db.updatePlayCounts(forTrack: tr), 0)
         }
         
         // Output of Reporter.log()
-        let reporter = Reporter(dbUrl: testDbURL)!
+        let reporter = Reporter(dbUrl: dbFile)!
         let log: [(Date, String, String, Int)] = reporter.log(limit: 10)
         XCTAssertEqual(log.count, 4)
     }
     
     /// Test the lower level Database with SQL-Queries.
     func testDatabase() {
-        let db = Database(dbFileURL: testDbURL)!
+        let dbFile = temporaryFile()
+        let db = Database(dbFileURL: dbFile)!
         
-        var last = db.executeNonQuery(sql: "CREATE TABLE foo (a INTEGER, b INTEGER, c INTEGER, d TEXT, e TEXT, f TEXT)")
-        XCTAssert(last == 0)
+        db.executeNonQuery(sql: "CREATE TABLE foo (a INTEGER, b INTEGER, c INTEGER, d TEXT, e TEXT, f TEXT)")
         
-        last = db.executeNonQuery(sql: "INSERT INTO foo VALUES (?, ?, NULL, ?, ?, NULL)", params: ["11", "twelve", "fourteen", ""])
+        var last = db.executeNonQuery(sql: "INSERT INTO foo VALUES (?, ?, NULL, ?, ?, NULL)", params: ["11", "twelve", "fourteen", ""])
         XCTAssert(last == 1)
         
         last = db.executeNonQuery(sql: "INSERT INTO foo VALUES (?, ?, NULL, ?, ?, NULL)", params: ["21", "22", "twenty-four", "twenty-five"])
@@ -146,8 +160,7 @@ class idbcl_test: XCTestCase {
         
         
         // Empty Table
-        last = db.executeNonQuery(sql: "CREATE TABLE bar (a INTEGER, b TEXT)")
-        XCTAssertEqual(last, 1)
+        db.executeNonQuery(sql: "CREATE TABLE bar (a INTEGER, b TEXT)")
         
         let foo2 = db.executeQuery(sql: "SELECT * FROM bar")
         XCTAssertNotNil(foo2)
