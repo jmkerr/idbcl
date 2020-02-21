@@ -115,7 +115,7 @@ struct PlayList {
 }
 
 public class Reporter {
-    let tracks: [DatabaseTrack]
+    let tracks: [String : DatabaseTrack]
     let playCounts: [(String, Int, Int)]
     let ratings: [(String, Int, Int)]
     
@@ -127,29 +127,28 @@ public class Reporter {
     }
     
     init(db: DbTables) {
-        
         let meta = db.getMeta()
         playCounts = db.getPlayCounts()
         ratings = db.getRatings()
         
         let playCountsById = Dictionary(grouping: playCounts, by: { $0.0 })
         let ratingsById = Dictionary(grouping: ratings, by: { $0.0 })
-    
-        tracks = meta.map({
-            let pid = $0[0] as! String // TODO: Nil & Sanity check
-            return DatabaseTrack(meta: $0,
-                                 playCounts: playCountsById[pid] ?? [],
-                                 ratings: ratingsById[pid] ?? [])
+          
+        tracks = Dictionary(uniqueKeysWithValues: meta.map {
+            let pid = $0[0] as! String
+            return (pid, DatabaseTrack(meta: $0,
+                                       playCounts: playCountsById[pid] ?? [],
+                                       ratings: ratingsById[pid] ?? []))
         })
     }
     
     public func getTrack(id: String) -> DatabaseTrack? {
-        return tracks.first(where: { $0.id == id })
+        return tracks[id]
     }
 
     public func report(groupBy: [String], sortBy: String, from: Int, to: Int, count: Bool = true) -> [(String, Double)] {
         
-        let groupedTracks = Dictionary(grouping: tracks, by: { group(track: $0, groups: groupBy) })
+        let groupedTracks = Dictionary(grouping: tracks.values, by: { group(track: $0, groups: groupBy) })
         let plists: [PlayList] = groupedTracks.map({ PlayList(name: $0, tracks: $1) })
     
         var top: [(String, Double)] = plists.map {
@@ -165,7 +164,7 @@ public class Reporter {
     public func log(limit: Int) -> [(Date, String, String, Int)] {
         let playCountsLog = playCounts.map({ ($0.1, "PlayCount", $0.0, $0.2) })
         let ratingsLog = ratings.map({ ($0.1, "Rating", $0.0, $0.2) })
-        let titles = Dictionary(uniqueKeysWithValues: tracks.map({
+        let titles = Dictionary(uniqueKeysWithValues: tracks.values.map({
             (group(track: $0, groupName: "PersistentID"), group(track: $0, groupName: "Title"))
         }) )
         
