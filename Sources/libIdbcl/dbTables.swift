@@ -6,54 +6,71 @@ class DbTables {
     let db: Database
     
     public init?(dbUrl: URL) {
-        if let db = Database(dbFileURL: dbUrl) { self.db = db }
+        if let db = Database(dbFileURL: dbUrl) {
+            self.db = db
+            
+            guard let userVersion = db.executeScalarQuery(sql: "PRAGMA user_version") as? Int else {
+                print("Unable to detect database schema version.")
+                return nil
+            }
+            
+            print("Opened DB-v\(userVersion):\(dbUrl.path)")
+            updateSchema(userVersion: userVersion)
+        }
         else { return nil }
-        createTables()
     }
     
     deinit {
         let rowCounts = Dictionary(uniqueKeysWithValues:
-            ["Meta", "PlayCounts", "Ratings"].map { ($0, db.executeScalarQuery(sql: "SELECT COUNT(*) FROM \($0)")!) } )
+            ["Meta", "PlayCounts", "Ratings"].map {
+                ($0, db.executeScalarQuery(sql: "SELECT COUNT(*) FROM \($0)") ?? "No such table")
+        })
        
-        print("Closing Database, \(rowCounts), changed \(db.totalChanges)" )
+        print("Closing Database, \(rowCounts), Changed \(db.totalChanges)" )
     }
     
-    private func createTables() {
-        /*
-         ITLibMediaEntityPropertyPersistentID == "PersistentID"
-         ITLibMediaItemPropertyAlbumTitle == "AlbumTitle"
-         ITLibMediaItemPropertyArtistName == "Artist"   (!)
-         ITLibMediaItemPropertyBitRate == "BitRate"
-         ...
-         */
-        db.executeNonQuery(sql: """
-        CREATE TABLE IF NOT EXISTS Meta (
-            \(ITLibMediaEntityPropertyPersistentID) TEXT PRIMARY KEY,
-            \(ITLibMediaItemPropertyAlbumTitle) TEXT,
-            \(ITLibMediaItemPropertyArtistName) TEXT,
-            \(ITLibMediaItemPropertyBitRate) INTEGER,
-            \(ITLibMediaItemPropertyFileSize) INTEGER,
-            \(ITLibMediaItemPropertyGenre) TEXT,
-            \(ITLibMediaItemPropertyKind) TEXT,
-            \(ITLibMediaItemPropertySampleRate) INTEGER,
-            \(ITLibMediaItemPropertyTitle) TEXT,
-            \(ITLibMediaItemPropertyTotalTime) INTEGER,
-            \(ITLibMediaItemPropertyYear) INTEGER)
-        """)
-        db.executeNonQuery(sql: """
-        CREATE TABLE IF NOT EXISTS PlayCounts (
-            \(ITLibMediaEntityPropertyPersistentID) TEXT,
-            Date INTEGER,
-            \(ITLibMediaItemPropertyPlayCount) INTEGER,
-            PRIMARY KEY (\(ITLibMediaEntityPropertyPersistentID),
-                         \(ITLibMediaItemPropertyPlayCount)))
-        """)
-        db.executeNonQuery(sql: """
-        CREATE TABLE IF NOT EXISTS Ratings (
-            \(ITLibMediaEntityPropertyPersistentID) TEXT,
-            Date INTEGER,
-            \(ITLibMediaItemPropertyRating) INTEGER)
-        """)
+    private func updateSchema(userVersion: Int) {
+        if userVersion == 0 {
+            print("Updating tables to schema version 1")
+            /*
+             ITLibMediaEntityPropertyPersistentID == "PersistentID"
+             ITLibMediaItemPropertyAlbumTitle == "AlbumTitle"
+             ITLibMediaItemPropertyArtistName == "Artist"   (!)
+             ITLibMediaItemPropertyBitRate == "BitRate"
+             ...
+             */
+            db.executeNonQuery(sql: "BEGIN TRANSACTION")
+            db.executeNonQuery(sql: """
+            CREATE TABLE IF NOT EXISTS Meta (
+                \(ITLibMediaEntityPropertyPersistentID) TEXT PRIMARY KEY,
+                \(ITLibMediaItemPropertyAlbumTitle) TEXT,
+                \(ITLibMediaItemPropertyArtistName) TEXT,
+                \(ITLibMediaItemPropertyBitRate) INTEGER,
+                \(ITLibMediaItemPropertyFileSize) INTEGER,
+                \(ITLibMediaItemPropertyGenre) TEXT,
+                \(ITLibMediaItemPropertyKind) TEXT,
+                \(ITLibMediaItemPropertySampleRate) INTEGER,
+                \(ITLibMediaItemPropertyTitle) TEXT,
+                \(ITLibMediaItemPropertyTotalTime) INTEGER,
+                \(ITLibMediaItemPropertyYear) INTEGER)
+            """)
+            db.executeNonQuery(sql: """
+            CREATE TABLE IF NOT EXISTS PlayCounts (
+                \(ITLibMediaEntityPropertyPersistentID) TEXT,
+                Date INTEGER,
+                \(ITLibMediaItemPropertyPlayCount) INTEGER,
+                PRIMARY KEY (\(ITLibMediaEntityPropertyPersistentID),
+                             \(ITLibMediaItemPropertyPlayCount)))
+            """)
+            db.executeNonQuery(sql: """
+            CREATE TABLE IF NOT EXISTS Ratings (
+                \(ITLibMediaEntityPropertyPersistentID) TEXT,
+                Date INTEGER,
+                \(ITLibMediaItemPropertyRating) INTEGER)
+            """)
+            db.executeNonQuery(sql: "PRAGMA user_version=1")
+            db.executeNonQuery(sql: "COMMIT")
+        }
     }
     
     private func getTable(_ table: String) -> [[Any?]]? { return db.executeQuery(sql: "SELECT * FROM \(table)") }

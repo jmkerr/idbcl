@@ -13,7 +13,6 @@ class Database {
             print("Error opening database")
             return nil
         }
-        else { print("Opened Database " + dbFileURL.path) }
     }
     
     deinit {

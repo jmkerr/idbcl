@@ -165,8 +165,19 @@ class idbcl_test: XCTestCase {
         let foo2 = db.executeQuery(sql: "SELECT * FROM bar")
         XCTAssertNotNil(foo2)
         XCTAssertEqual(foo2!.count, 0)
+        
+        
+        // test PRAGMA user_version
+        if let version = db.executeScalarQuery(sql: "PRAGMA user_version") as? Int {
+            XCTAssertEqual(version, 0)
+        } else { XCTFail() }
+        
+        last = db.executeNonQuery(sql: "PRAGMA user_version=7")
+        XCTAssertEqual(last, 1)
+        
+        if let version = db.executeScalarQuery(sql: "PRAGMA user_version") as? Int {
+            XCTAssertEqual(version, 7)
+        } else { XCTFail() }
     }
-    
-    
 }
  
