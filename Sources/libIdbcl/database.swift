@@ -43,6 +43,7 @@ class Database {
             
             let cols = sqlite3_column_count(statement)
             var row: [Any?] = []
+            row.reserveCapacity(Int(cols))
             
             for col in 0...cols-1 {
                 switch sqlite3_column_type(statement, col) {
