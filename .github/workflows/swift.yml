@@ -4,12 +4,7 @@ on: [push]
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [macOS-10.14, macOS-10.15]
-    
-    runs-on: ${{ matrix.os }}
-    
+    runs-on: macOS-latest 
     steps:
     - uses: actions/checkout@v1
     - name: Build
@@ -21,10 +16,8 @@ jobs:
     - name: Install as agent
       run: |
         swift run -c release idbcl create-launchagent
-        # Sign
-        codesign -s - -v ./.build/release/idbcl
-        # Lint the generated file
-        plutil -lint ~/Library/LaunchAgents/idbcl.plist
+        # Sign (if required)
+        # codesign -s - -v ./.build/release/idbcl
         # Load without restarting user aqua session
         launchctl load ~/Library/LaunchAgents/idbcl.plist
         launchctl list idbcl
