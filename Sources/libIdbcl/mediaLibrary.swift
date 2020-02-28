@@ -44,13 +44,13 @@ public class MediaLibrary {
         self.dbUrl = dbUrl
     }
 
-    public func updateDB() {
+    public func updateDB(dryRun: Bool) {
         if let mediaItems = lib?.allMediaItems,
-            let db = Updater(dbFileURL: self.dbUrl) {
+            let db = Updater(dbFileURL: self.dbUrl, dryRun: dryRun) {
             let songItems = mediaItems.filter { $0.mediaKind == ITLibMediaItemMediaKind.kindSong }
             if songItems.count > 0 {
                 for item in songItems {
-                    let tr = Track(fromItem: item)
+                    let tr = LibraryTrack(fromItem: item)
                     db.updateMeta(forTrack: tr)
                     db.updatePlayCounts(forTrack: tr)
                     db.updateRatings(forTrack: tr)

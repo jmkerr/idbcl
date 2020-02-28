@@ -1,6 +1,8 @@
 import Foundation
 import SQLite3
 
+extension String: Error {}
+
 let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
 /// Provides methods to execute SQL-Queries
@@ -19,6 +21,13 @@ class Database {
         if sqlite3_close(db) != SQLITE_OK {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
             print("Error closing Database: \(errmsg)")
+        }
+    }
+    
+    public func exec(_ sql: String) throws {
+        if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
+            let errmsg = String(cString: sqlite3_errmsg(db)!)
+            throw "Error during exec(\(sql)): \(errmsg)"
         }
     }
     

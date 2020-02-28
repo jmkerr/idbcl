@@ -7,9 +7,12 @@ class UpdateCmd: Command {
     let name = "update"
     let shortDescription = "Creates and updates the database"
     
+    @Flag("-d", "--dry-run", description: "Do not commit any changes into the database.")
+    var dryRun: Bool
+    
     func execute() throws {
         if let lib = MediaLibrary(dbUrl: Configuration.dbFilePath!) {
-            lib.updateDB()
+            lib.updateDB(dryRun: dryRun)
         }
     }
 }
@@ -86,7 +89,7 @@ class ReportCmd: Command {
         
         let groupByIntersecting = groupingProperty.components(separatedBy: ",")
         
-        let groupingOptions = PROPERTY_HEADERS + ["Decade", "PlayCount", "Rating", "PersistentID",  "TotalMinutes"]
+        let groupingOptions = DatabaseTrack.metadataLayout + ["Decade", "PlayCount", "Rating", "PersistentID",  "TotalMinutes"]
         
         for group in groupByIntersecting {
             if !groupingOptions.contains(group) {
@@ -134,6 +137,6 @@ class ReportCmd: Command {
     }
 }
 
-let cli = CLI(name: "idbcl")
+let cli = CLI(name: "idbcl", description: "The idbcl tools. See help pages (-h) of the individual commands.")
 cli.commands = [UpdateCmd(), InstallCmd(), LogCmd(), ReportCmd()]
 cli.goAndExit()

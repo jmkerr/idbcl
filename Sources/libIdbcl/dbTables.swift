@@ -1,37 +1,75 @@
 import iTunesLibrary
 
+enum Access {
+    /// Can open and commit write transactions
+    case readwrite
+    
+    /// Can open write transactions
+    case dryrun
+}
+
 /// Table level database abstraction used by Reporter and Updater.
 
 class DbTables {
     let db: Database
+    let access: Access
     
-    public init?(dbUrl: URL) {
-        if let db = Database(dbFileURL: dbUrl) {
+    public init?(dbUrl: URL, access: Access = .readwrite) {
+        if let db = Database(dbFileURL: dbUrl ) {
             self.db = db
+            self.access = access
             
             guard let userVersion = db.executeScalarQuery(sql: "PRAGMA user_version") as? Int else {
                 print("Unable to detect database schema version.")
                 return nil
             }
             
-            print("Opened DB-v\(userVersion):\(dbUrl.path)")
-            updateSchema(userVersion: userVersion)
+            print("Opened DB, v\(userVersion), \(dbUrl.path)")
+
+            do {
+                try beginTransaction()
+                try setSchema(userVersion: userVersion)
+                try commitTransaction()
+                
+            } catch {
+                print(error)
+                return nil
+            }
+        
         }
         else { return nil }
     }
     
     deinit {
-        let rowCounts = Dictionary(uniqueKeysWithValues:
-            ["Meta", "PlayCounts", "Ratings"].map {
-                ($0, db.executeScalarQuery(sql: "SELECT COUNT(*) FROM \($0)") ?? "No such table")
-        })
-       
-        print("Closing Database, \(rowCounts), Changed \(db.totalChanges)" )
+        let nrows = db.executeQuery(sql:"""
+            SELECT (SELECT COUNT(*) FROM Meta),
+                (SELECT COUNT(*) FROM PlayCounts),
+                (SELECT COUNT(*) FROM Ratings)
+            """)![0].map { String(describing: $0!) }
+        
+        do { try commitTransaction() }
+        catch { print(error) }
+        
+        print("Closing Database, M: \(nrows[0]), P: \(nrows[1]), R: \(nrows[2]), Changed \(db.totalChanges)")
     }
     
-    private func updateSchema(userVersion: Int) {
+    private func beginTransaction() throws {
+        try db.exec("BEGIN TRANSACTION")
+    }
+    
+    private func commitTransaction() throws {
+        if access == .dryrun {
+            /* Implicit rollback on (RAII) close */
+            
+        } else if access == .readwrite {
+            try db.exec("COMMIT")
+            try beginTransaction()
+        }
+    }
+    
+    private func setSchema(userVersion: Int) throws {
         if userVersion == 0 {
-            print("Updating tables to schema version 1")
+            print("Updating tables to schema version 1...", terminator: "")
             /*
              ITLibMediaEntityPropertyPersistentID == "PersistentID"
              ITLibMediaItemPropertyAlbumTitle == "AlbumTitle"
@@ -39,8 +77,7 @@ class DbTables {
              ITLibMediaItemPropertyBitRate == "BitRate"
              ...
              */
-            db.executeNonQuery(sql: "BEGIN TRANSACTION")
-            db.executeNonQuery(sql: """
+            let sql = ["""
             CREATE TABLE IF NOT EXISTS Meta (
                 \(ITLibMediaEntityPropertyPersistentID) TEXT PRIMARY KEY,
                 \(ITLibMediaItemPropertyAlbumTitle) TEXT,
@@ -53,48 +90,54 @@ class DbTables {
                 \(ITLibMediaItemPropertyTitle) TEXT,
                 \(ITLibMediaItemPropertyTotalTime) INTEGER,
                 \(ITLibMediaItemPropertyYear) INTEGER)
-            """)
-            db.executeNonQuery(sql: """
+            """,
+            """
             CREATE TABLE IF NOT EXISTS PlayCounts (
                 \(ITLibMediaEntityPropertyPersistentID) TEXT,
                 Date INTEGER,
                 \(ITLibMediaItemPropertyPlayCount) INTEGER,
                 PRIMARY KEY (\(ITLibMediaEntityPropertyPersistentID),
                              \(ITLibMediaItemPropertyPlayCount)))
-            """)
-            db.executeNonQuery(sql: """
+            """,
+            """
             CREATE TABLE IF NOT EXISTS Ratings (
                 \(ITLibMediaEntityPropertyPersistentID) TEXT,
                 Date INTEGER,
                 \(ITLibMediaItemPropertyRating) INTEGER)
-            """)
-            db.executeNonQuery(sql: "PRAGMA user_version=1")
-            db.executeNonQuery(sql: "COMMIT")
+            """,
+            "PRAGMA user_version=1"]
+            
+            for query in sql { try db.exec(query) }
+            print("OK")
         }
     }
     
     private func getTable(_ table: String) -> [[Any?]]? { return db.executeQuery(sql: "SELECT * FROM \(table)") }
-    private func getThreeColumnTable(_ table: String) -> [(String, Int, Int)] {
+    private func getTypedTable(_ table: String) -> [(String, Int, Int)] {
             return getTable(table)!.map({ ($0[0] as! String, $0[1] as! Int, $0[2] as! Int) })
     }
     
     public func getMeta() -> [[Any?]] { getTable("Meta")! }
-    public func getPlayCounts() -> [(String, Int, Int)] { return getThreeColumnTable("PlayCounts") }
-    public func getRatings() -> [(String, Int, Int)] { return getThreeColumnTable("Ratings") }
+    public func getPlayCounts() -> [(String, Int, Int)] { return getTypedTable("PlayCounts") }
+    public func getRatings() -> [(String, Int, Int)] { return getTypedTable("Ratings") }
     
+    @discardableResult
     public func setMeta(id: String, property: String, value: String?) -> Int {
         return db.executeNonQuery(sql: "UPDATE Meta SET \(property) = ? WHERE PersistentID = ?", params: [value, id])
     }
     
+    @discardableResult
     public func setMeta(values: [String?]) -> Int {
         return db.executeNonQuery(sql: "INSERT INTO Meta VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params: values)
     }
     
+    @discardableResult
     public func setPlayCount(id: String, value: Int) -> Int {
         return db.executeNonQuery(sql: "INSERT OR IGNORE INTO PlayCounts VALUES (?, ?, ?)",
                                   params: [id, String(Int(Date.current.timeIntervalSince1970)),String(value)])
     }
     
+    @discardableResult
     public func setRating(id: String, value: Int) -> Int {
         return db.executeNonQuery(sql: "INSERT OR IGNORE INTO Ratings VALUES (?, ?, ?)",
                                   params: [id, String(Int(Date.current.timeIntervalSince1970)), String(value)])
