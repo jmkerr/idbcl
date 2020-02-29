@@ -11,7 +11,6 @@ class idbcl_test: XCTestCase {
         public var props: [String : Any?] = [:]
         
         init(persistentID: NSNumber = 0, props: [String : Any] = [:]) {
-            //self.init()
             self.props = props
             self.mockid = persistentID
         }

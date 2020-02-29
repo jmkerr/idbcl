@@ -20,9 +20,16 @@ class UpdateCmd: Command {
 class InstallCmd: Command {
     
     let name = "create-launchagent"
-    let shortDescription = "Creates a launchd agent property list"
+    let shortDescription = "Create a launchd user agent property list to run the update command on login and periodically"
+
+    @Key("-s", "--start-interval", description: "Run every # seconds (default '12345')")
+    var candidateStartInterval: Int?
+    let defaultStartInterval = 12345
     
-    func execute() throws { createLaunchAgent() }
+    func execute() throws {
+        let startInterval = candidateStartInterval ?? defaultStartInterval
+        createLaunchAgent(startInterval: startInterval)
+    }
 }
 
 class LogCmd: Command {

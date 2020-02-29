@@ -23,11 +23,6 @@ public class MediaLibrary {
             print(msg)
         }
         
-        guard let _: URL = lib?.musicFolderLocation else {
-            print("Error: No music folder.")
-            return nil
-        }
-        
         let dbDirectory: URL = dbUrl.deletingLastPathComponent()
         do {
             try FileManager.default.createDirectory(at: dbDirectory,
@@ -56,7 +51,7 @@ public class MediaLibrary {
                     db.updateRatings(forTrack: tr)
                 }
             } else {
-                print("The iTunes-Library appears to be empty.")
+                print("The iTunes-Library is empty.")
             }
         } else {
             print("Invalid operation")

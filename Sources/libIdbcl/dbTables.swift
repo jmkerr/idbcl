@@ -59,7 +59,7 @@ class DbTables {
     
     private func commitTransaction() throws {
         if access == .dryrun {
-            /* Implicit rollback on (RAII) close */
+            /* Implicit rollback */
             
         } else if access == .readwrite {
             try db.exec("COMMIT")
