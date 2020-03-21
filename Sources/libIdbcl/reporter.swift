@@ -1,6 +1,7 @@
 import Foundation
 
 func group(track: DatabaseTrack, groups: [String]) -> String {
+    if groups.count == 0 { return "All" }
     return groups.reduce("", { ($0.count == 0 ? "" : "\($0) - ") + group(track: track, groupName: $1) })
 }
     
@@ -14,13 +15,13 @@ func group(track: DatabaseTrack, groupName: String) -> String {
     
     switch groupName {
     case "Decade":
-        if let year = track.value(forProperty: "Year") as? Int { return String(year / 10 * 10) }
+        if let year = track.value(forProperty: "Year") as? Int { return String(year / 10 * 10) + "s" }
         
     case "PlayCount":
         if let pc = track.playCount { return pc.description }
                 
     case "Rating":
-        if let rating = track.rating { return String(Double(rating) / 20) }
+        if let rating = track.rating { return "\(Double(rating) / 20)􀋃" }
         
     case "PersistentID":
         return track.persistentID
@@ -37,12 +38,31 @@ func group(track: DatabaseTrack, groupName: String) -> String {
     return missing
 }
 
-struct PlayList {
-    let name: String
-    let tracks: [DatabaseTrack]
-    
+public let validGroups = DatabaseTrack.metadataLayout + ["Decade", "PlayCount", "Rating", "PersistentID",  "TotalMinutes"]
+
+public struct PlayList: Identifiable, Equatable, Hashable {
+    public var id: String { name }
+    public let name: String
+    public let tracks: [DatabaseTrack]
     var count: Int { return tracks.count }
     
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+    }
+    
+    public static func == (lhs: PlayList, rhs: PlayList) -> Bool {
+        return lhs.name == rhs.name
+    }
+    
+    public func getSamples(_ property: String, range: ClosedRange<Int>, count: Int = 300) -> [Double] {
+        let domain = stride(from: range.lowerBound, through: range.upperBound, by: (range.upperBound - range.lowerBound)/count)
+        switch property {
+        case "PlayCount": return domain.map { Double(totalPlayCount(date: $0)) }
+        case "Rating": return domain.map { Double(avgRating(date: $0)) }
+        default: return []
+        }
+    }
+
     func totalPlayCount(date: Int) -> Int {
         return tracks.reduce(0, { $0 + ($1.playCount(date: date) ?? DEFAULT_PLAY_COUNT)})
     }
@@ -104,6 +124,12 @@ public class Reporter {
                                        playCounts: playCountsById[pid] ?? [],
                                        ratings: ratingsById[pid] ?? []))
         })
+    }
+    
+    public func playlists(groupBy: [String]) -> [PlayList] {
+        let groupedTracks = Dictionary(grouping: tracks.values, by: { group(track: $0, groups: groupBy) })
+        let plists: [PlayList] = groupedTracks.map({ PlayList(name: $0, tracks: $1) })
+        return plists
     }
 
     public func report(groupBy: [String], sortBy: String, from: Int, to: Int, count: Bool = true) -> [(String, Double)] {

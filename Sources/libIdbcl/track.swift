@@ -83,7 +83,7 @@ public class DatabaseTrack: Track {
     
     init(meta: [Any?], playCounts: [(String, Int, Int)] = [], ratings: [(String, Int, Int)] = []) {
         assert(meta.count == DatabaseTrack.metadataLayout.count + 1, "Wrong usage of DatabaseTrack.init()")
-        assert(meta[0] is String, "Wrong usage of DatabaseTrack.init()")
+        assert((meta[0] as? String)?.range(of: "^[0-9A-F]{16}$", options: .regularExpression, range: nil, locale: nil) != nil, "Not an ID: \(String(describing: meta[0]))")
         
         self.playCounts = playCounts.sorted(by: { $0.1 > $1.1 })
         self.ratings = ratings.sorted(by: { $0.1 > $1.1 })

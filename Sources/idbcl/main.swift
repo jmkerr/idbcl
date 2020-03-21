@@ -1,6 +1,7 @@
 import Foundation
 import libIdbcl
 import SwiftCLI
+import gui
 
 class UpdateCmd: Command {
     
@@ -20,7 +21,8 @@ class UpdateCmd: Command {
 class InstallCmd: Command {
     
     let name = "create-launchagent"
-    let shortDescription = "Create a launchd user agent property list to run the update command on login and periodically"
+    let shortDescription = "Create a launchd user agent property list"
+    let longDescription: String = "Create a launchd user agent property list. This runs the update command on login and periodically."
 
     @Key("-s", "--start-interval", description: "Run every # seconds (default '12345')")
     var candidateStartInterval: Int?
@@ -96,11 +98,9 @@ class ReportCmd: Command {
         
         let groupByIntersecting = groupingProperty.components(separatedBy: ",")
         
-        let groupingOptions = DatabaseTrack.metadataLayout + ["Decade", "PlayCount", "Rating", "PersistentID",  "TotalMinutes"]
-        
         for group in groupByIntersecting {
-            if !groupingOptions.contains(group) {
-                print("Error: Invalid grouping property '\(group)'. Expected comma separated list of \(groupingOptions)")
+            if !validGroups.contains(group) {
+                print("Error: Invalid grouping property '\(group)'. Expected comma separated list of \(validGroups)")
                 return
             }
         }
@@ -144,6 +144,19 @@ class ReportCmd: Command {
     }
 }
 
+class GuiCmd: Command {
+    
+    let name = "gui"
+    let shortDescription = "Plotter (experimental)"
+    
+    func execute() throws {
+        if let reporter = Reporter(dbUrl: Configuration.dbFilePath!) {
+            showGui(reporter: reporter)
+        }
+    }
+    
+}
+
 let cli = CLI(name: "idbcl", description: "The idbcl tools. See help pages (-h) of the individual commands.")
-cli.commands = [UpdateCmd(), InstallCmd(), LogCmd(), ReportCmd()]
+cli.commands = [UpdateCmd(), InstallCmd(), LogCmd(), ReportCmd(), GuiCmd()]
 cli.goAndExit()
