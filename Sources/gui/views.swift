@@ -146,15 +146,16 @@ struct RightView: View {
             HStack {
                 
                 ForEach(fun.selection.indices, id: \.self) { n in Button(action: {
-                    self.fun.selection.removeAll(where: { $0 == self.fun.selection[n] })
+                    self.fun.selection = self.fun.selection.filter({ $0 != self.fun.selection[n] })
                 }) {
                     Text(self.fun.selection[n].name + " ×")
                         .foregroundColor(getColor(n))
                 }}
                 
                 if showCursorButton {
-                    Button(fun.cursor!.name + " ＋") { self.fun.selection.append(self.fun.cursor!) }
-                        .foregroundColor(getColor(fun.selection.count))
+                    Button(fun.cursor!.name + " ＋") {
+                        self.fun.selection = self.fun.selection + [self.fun.cursor!]
+                    }.foregroundColor(getColor(fun.selection.count))
                 }
                 Spacer()
             }

@@ -22,25 +22,21 @@ extension String {
 
 class PlotData: ObservableObject {
     @Published var domain: String = "1M" {
-        willSet { objectWillChange.send() }
         didSet { updateSamples() }
     }
     @Published var function: String = "PlayCount" {
         didSet { updateSamples() }
     }
     @Published var selection: [PlayList] = [] {
-        willSet { objectWillChange.send() }
         didSet { updateSamples() }
     }
     @Published var cursor: PlayList? {
-        willSet { objectWillChange.send() }
         didSet { updateSamples() }
     }
     
     @Published var yRange: Range<Double> = 0 ..< 0
     @Published var data: [AnimatableData] = []
     
-    let objectWillChange = ObservableObjectPublisher()
     let samplingQueue = DispatchQueue(label: "sampling", qos: .userInteractive)
     
     func updateSamples() {
@@ -54,7 +50,6 @@ class PlotData: ObservableObject {
             let normalized = samples.map { $0.map { ($0 - min)/(max != min ? max - min : 1) }}
             
             DispatchQueue.main.async {
-                self.objectWillChange.send()
                 self.yRange = min ..< max
                 self.data = normalized.map { AnimatableData(with: $0) }
             }
